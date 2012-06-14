@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/get_start"/>
+	<classpathentry kind="src" path="src/steps_in_scala"/>
+	<classpathentry kind="src" path="src/tour"/>
+	<classpathentry kind="src" path="src/byexample"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

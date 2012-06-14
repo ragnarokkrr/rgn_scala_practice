@@ -1,6 +1,9 @@
 <map version="0.9.0">
 <!--To view this file, download free mind mapping software Freeplane from http://freeplane.sourceforge.net -->
-<node TEXT="Scala Studies" ID="ID_1723255651" CREATED="1283093380553" MODIFIED="1331860080545"><hook NAME="MapStyle">
+<node TEXT="Steps in Scala" ID="ID_1387190755" CREATED="1331859054685" MODIFIED="1333649149006" LINK="Scala%20Studies.mm">
+<edge COLOR="#ff0000" WIDTH="3"/>
+<font BOLD="false"/>
+<hook NAME="MapStyle">
 
 <map_styles>
 <stylenode LOCALIZED_TEXT="styles.root_node">
@@ -49,17 +52,7 @@
 </stylenode>
 </map_styles>
 </hook>
-<hook NAME="AutomaticEdgeColor" COUNTER="5"/>
+<hook NAME="AutomaticEdgeColor" COUNTER="4"/>
 <hook NAME="accessories/plugins/AutomaticLayout.properties"/>
-<node TEXT="Steps in Scala" POSITION="right" ID="ID_1874046953" CREATED="1333649149065" MODIFIED="1333649149074" LINK="StepsInScala.mm">
-<edge COLOR="#00ffff" WIDTH="3"/>
-</node>
-<node TEXT="Actors in Scala" POSITION="right" ID="ID_1519688693" CREATED="1331860107961" MODIFIED="1331860112038">
-<edge COLOR="#0000ff" WIDTH="3"/>
-</node>
-<node TEXT="A Tour of Scala" POSITION="left" ID="ID_5105349" CREATED="1331861881232" MODIFIED="1331861881235">
-<edge COLOR="#ff00ff" WIDTH="3"/>
-<node TEXT="http://www.scala-lang.org/node/104" ID="ID_1424289045" CREATED="1331861849322" MODIFIED="1331861885991" LINK="http://www.scala-lang.org/node/104"/>
-</node>
 </node>
 </map>
