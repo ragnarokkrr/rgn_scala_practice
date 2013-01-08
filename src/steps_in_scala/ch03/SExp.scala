@@ -8,28 +8,41 @@ case class Pair(left: SExp, right: SExp) extends SExp
 object SExp {
 
   def main(args: Array[String]): Unit = {
-	//var sexp = createSExp
-	
+    //var sexp = createSExp
+
     var sexp = Pair(Atom('a'), Pair(Atom('b'), Atom('c')))
-    println (sexp)
+    println(sexp)
     printSExp(sexp)
+    println()
+    car(sexp)
   }
-  
-  def printSExp(sexp: SExp):Unit = {
-    
-    sexp match{
+
+  def car(sexp: SExp): Unit = {
+	var found = false
+    def _car(sexp: SExp): Unit = {
+      (sexp, found) match {
+        case (Atom(elem), false) => {println(elem); found = true}
+        case (_, true) => ()
+        case (Pair(l, r), _) => {_car(l); _car(r) }
+      }
+    }
+    _car(sexp)
+  }
+
+  def printSExp(sexp: SExp): Unit = {
+
+    sexp match {
       case Atom(elem) => print(elem)
       case Pair(left, right) => {
-    	  print("(")
-    	  printSExp(left)
-    	  print(",")
-    	  printSExp(right)
-    	  print(")")
+        print("(")
+        printSExp(left)
+        print(",")
+        printSExp(right)
+        print(")")
       }
-      
+
     }
-    
-    
+
   }
 
   def createSExp(): SExp = {
