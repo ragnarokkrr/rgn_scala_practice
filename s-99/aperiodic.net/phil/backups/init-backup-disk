@@ -1,0 +1,79 @@
+#!/bin/sh
+
+if [ $(id -u) -ne 0 ]; then
+    echo "This must be run as root." 1>&2
+    exit 1
+fi
+
+if [ "$1" = "" ]; then
+    echo "Must provide a disk as the first parameter." 1>&2
+    exit 1
+fi
+
+if [ "$2" = "" ]; then
+    echo "Must provide key file as a second parameter." 1>&2
+    exit 1
+fi
+
+if [ \! -b $1 ]; then
+    echo "The first parameter must be a block device representing an empty disk." 1>&2
+    exit 1
+fi
+
+if [ "$(partx -l $1)" != "" ]; then
+    partx -l $1 1>&2
+    echo "The disk must not have a partition table." 1>&2
+    exit 1
+fi
+
+disk=$1
+keyfile=$2
+
+# Create key file, if necessary.
+if [ \! -e $2 ]; then
+    oldumask=$(umask)
+    umask 077
+    dd if=/dev/random of=$2 bs=1 count=256
+    chmod 0500 $2
+    umask $oldumask
+fi
+
+# Check and randomize disk.
+badblocks -b 512 -s -w -t random -v $disk || exit 2
+</dev/urandom pv -s $(fdisk -l $disk |
+    perl -nle 'm{^Disk '${disk}': [0-9.]+ [KMGT]B, (\d+) bytes$} and print $1') |
+  dd bs=512 conv=sync,noerror of=$disk
+
+# Add and format the LUKS partition.
+echo , | sfdisk --Linux $disk
+cryptsetup luksFormat --cipher aes-cbc-essiv:sha256 --batch-mode ${disk}1 $keyfile
+sfdisk -R $disk; sleep 5
+
+# Open LUKS partition, format and mount the encrypted volume.
+cryptsetup --key-file $keyfile luksOpen ${disk}1 backups
+mkfs -t jfs -q /dev/mapper/backups
+mount /backups
+
+# Do the initial backup.
+mkdir -vp /backups/1/{etc,var,phil,postgresql,mysql,rivana}
+chmod a-w /backups/1
+chown rivana /backups/1/rivana
+chown postgres /backups/1/postgresql
+rsync -avP --filter 'merge /etc/backups/etc-filter' /etc/ /backups/1/etc/
+rsync -avP --filter 'merge /etc/backups/var-filter' /var/ /backups/1/var/
+rsync -avP --filter 'merge /etc/backups/phil-filter' /home/phil/ /backups/1/phil/
+su -c 'pg_dumpall -v >/backups/1/postgresql/dump' postgres
+mysqldump -v --all-databases >/backups/1/mysql/dump
+echo -n "Hit enter when rivana is backed up.  "
+read foo
+
+# Deactivate the encrypted volume.
+umount /backups
+cryptsetup luksClose backups
+
+# Add user password.
+cryptsetup --key-file $keyfile --verify-passphrase luksAddKey ${disk}1
+
+# Display the partition's UUID.
+echo -n 'UUID: '
+cryptsetup luksUUID ${disk}1

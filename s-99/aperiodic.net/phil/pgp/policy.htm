@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>PGP Signature Policy</title>
+<link rel="stylesheet" type="text/css" href="../default.css">
+</head>
+
+<body>
+<h1>PGP Signature Policy</h1>
+
+<p>The <a href="http://rfc.net/rfc2440.html">OpenPGP standard</a>
+specifies four types of signatures on public keys, numbered from 0x10 to
+0x13.  These are listed in the <a href="http://rfc.net/rfc2440.html#s5.2.1.">
+Signature Types</a> section of the standard.  (Different programs may
+represent these levels differently--GnuPG displays nothing for 0x10 and
+numbers 0x11 through 0x13 as 1 through 3.)</p>
+
+<p>I have certain criteria I use for each level of certification I use on
+public keys:</p>
+
+<dt>0x10</dt>
+<dd>Uncategorized.  This signature was made before GnuPG gained support
+  for specifying the level of certification.  It is possible that I may
+  use this for a signature that I refuse to categorize, but that has not
+  yet happened.
+</dd>
+  
+<dt>0x11</dt>
+<dd>Very casual certification.  This signature was made on a key of
+  someone whom I do not know personally and have only verified their
+  identity via some third-party identification that I reasonably trust.
+  (So far, that has been limited to state-issued driver's licenses.)  The
+  email address in the uid appears to go to the named keyholder.
+</dd>
+
+<dt>0x12</dt>
+<dd>Personal knowledge of the keyholder.  This signature was made on a key
+  belonging to someone I have known personally for long enough that I'm
+  reasonably sure of their identity.  The email address certainly goes to
+  the keyholder.
+</dd>
+
+<dt>0x13</dt>
+<dd>Extremely high trust in the keyholder's identity.  I have not yet used
+  this level of certification on anyone else's keys.  In order for me to
+  do so would require that I do extensive research on the person to verify
+  their identity.  I do not anticipate ever doing this, so for the moment,
+  the only keys signed with this level of certification will be my
+  own.
+</dd>
+
+<p>You may also check this policy against <a href="http://aperiodic.net/phil/pgp/policy.html.sig">its
+detached signature</a>.</p>
+
+<hr>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="index.htm">Back to PGP</a><br>
+<a href="../index.htm">Back to top level</a><br>
+</p>
+</body> </html>

@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>recv-keys</title>
+<link rel="stylesheet" type="text/css" href="../default.css">
+</head>
+
+<body>
+<h1>recv-keys</h1>
+
+<p>recv-keys is a simple shell script written by Mike Gurski to send and
+receive PGP keys to (and from) all of the OpenPGP keyservers.  This
+bypasses the problem that not all of the servers synchronize to each
+other.</p>
+
+<p>You will need the <code>host</code> program (which probably came with
+your OS distribution) and <a href="http://www.gnupg.org/">GPG</a>.  You'll
+also need a Unix computer--this won't work under Windows.</p>
+
+<p>To use it, download <a href="recv-keys(1).htm">recv-keys</a> and put it in a
+directory in your $PATH.  In that directory, make a hard link from it to
+send-keys (i.e. run '<code>ln recv-keys send-keys</code>').  Then, run
+whichever is appropriate with a list of key IDs.  To send my public key to
+the keyservers, I'd run '<code>send-keys D8C75CF5</code>'.</p>
+
+<hr>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="index.htm">Back to PGP page.</a><br>
+<a href="../index.htm">Back to main page.</a><br>
+</p>
+</body> </html>

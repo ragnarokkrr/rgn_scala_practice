@@ -1,0 +1,511 @@
+<html> <head>
+<title>PGP tutorial</title>
+<link rel="stylesheet" type="text/css" href="../default.css">
+</head>
+<body>
+<h1>PGP tutorial</h1>
+
+<p>Herein resides a brief (somewhat) tutorial on creating and signing PGP
+keys with GPG.  I'd originally intended to use this as the outline for a
+presentation on the subject, but decided to put it on the web so I could
+point people at it.  The introductory section (Basics) is pretty lean, but
+should provide enough of a background for simple stuff.  All of this is
+documented elsewhere on the web.</p>
+
+<ul>
+  <li>Motivation</li>
+  <ul>
+    <li>I think that encryption should be an important part of any email
+    system.</li>
+    <li>Much as I send regular mail in envelopes, not postcards, I prefer
+    to send email encrypted.</li>
+    <li>In general, I think that everyone should be familiar with PGP for
+    personal privacy reasons</li>
+    <li>In specific, I would, ideally, prefer never to send unencrypted
+    personal email.</li>
+  </ul>
+  <li>Basics</li>
+  <ul>
+    <li>Briefly cover encryption.</li>
+    <ul>
+      <li>Scrambles data so unauthorized people can't read it.</li>
+    </ul>
+    <li>Types of secrets</li>
+    <ul>
+      <li>Shared keys</li>
+      <ul>
+	<li>Simplest form of encryption.</li>
+	<li>Some secret information (like a password) will both encrypt
+	and decrypt.</li>
+      </ul>
+      <li>public key systems</li>
+      <ul>
+	<li>There are two keys.</li>
+	<li>Things encrypted with one of the keys can only be decrypted
+	with the other.</li>
+	<li>Cannot tell by looking at one key what the other one is.</li>
+	<li>Keep one key secret and make other public.</li>
+	<li>Anyone can get public key and encrypt stuff for you.  Only you
+	can decrypt.</li>
+      </ul>
+    </ul>
+    <li>Signing</li>
+    <ul>
+      <li>Related to encryption</li>
+      <li>Signing takes some information and creates a "signature" from
+      it.</li>
+      <li>The signature is a block of data that can be used to verify the
+      origins of the signed information, much like a written signature on
+      a document.</li>
+      <li>Usually used in PKC.</li>
+      <li>Example: Send an email, sign with private key.  Someone receives
+      it and checks signature with your public key.  Only your public key
+      can properly decipher the signature, so, if it does, it must have
+      come from you.</li>
+    </ul>
+    <li>PGP</li>
+    <ul>
+      <li>Stands for Pretty Good Privacy</li>
+      <li>Not perfect, but good enough for most people.</li>
+      <li>Uses a public key system.</li>
+      <li>Keys represent a name and email address.</li>
+    </ul>
+    <li>GPG</li>
+    <ul>
+      <li>Stands for GNU Privacy Guard</li>
+      <li>Is a Free (open-source) implementation of the OpenPGP
+      standard.</li>
+      <li>Interoperates with PGP 2.x and 5.x.</li>
+      <li>This tutorial will cover gpg.  Concepts will apply to PGP
+      versions, but all the commands are gpg-specific.</li>
+    </ul>
+  </ul>
+  <li>Making a key.</li>
+  <ul>
+    <li>First, install gpg.</li>
+    <ul>
+      <li>Package in Debian is named gnupg.</li>
+      <li>I don't know about packages for other distributions (other than
+      that they exist).</li>
+      <li>If you want to compile from source, it's at
+      <a href="http://www.gnupg.org/">http://www.gnupg.org/</a>.</li>
+    </ul>
+    <li>As your normal user, run '<code>gpg --gen-key</code>'.</li>
+    <ul>
+      <li>First question is the type of key to make.  The default choice
+      (DSA and ElGamal) is ok.</li>
+      <ul>
+	<li>[skip for presentation]</li>
+	<li>DSA key is used for signing things.  It cannot be used to
+	encrypt.</li>
+	<li>ElGamal is the encrypting key.  It's not as good at signing as
+	DSA is because the signatures end up larger and it may be easier
+	to attack an ElGamal signature.</li>
+	<li>Paranoid people may wish to use RSA for signing, because
+	maximum size on a DSA key is 1024 bits.  In this case, the
+	encryption key will have to be added afterwards.</li>
+      </ul>
+      <li>Next question is about the size of the ElGamal key.  Again, the
+      default (1024 bits) is decent.</li>
+      <ul>
+	<li>[skip for presentation]</li>
+	<li>The larger the key, the harder it is to brute-force the
+	encryption.  (i.e. try every possible key and see which one
+	decodes the message.)</li>
+	<li>1024 bits is currently considered a reasonable size.</li>
+	<li>The minimum is 768, which isn't really recommended for
+	anything other than casual use.  It's probably not safe from
+	anything larger than a medium-sized business.</li>
+	<li>2048 is the highest recommended size.  Every bit doubles the
+	keys available, so 2048 is roughly 1.79e309 times harder to crack
+	than a 1024 bit key.</li>
+	<ul>
+	  <li>(I wanted to write out that number, but it would have been
+	  17.9 followed by 25 millions (i.e. 17.9 million million million
+	  ...).)</li>
+	</ul>
+	<li>A key size of 2048 would be used for stuff that you would
+	never want to be decrypted, even decades (and quite probably
+	centuries) after your death.  Most people a) don't need that sort
+	of security and b) are insecure enough in other ways that it
+	wouldn't matter anyway.</li>
+	<li>Keys larger than 2048 bits are not recommended because using
+	them would be very slow.</li>
+      </ul>
+      <li>The next step is to choose the expiration date of the encryption
+      subkey.</li>
+      <ul>
+	<li>The default option (no expiration) is probably the best choice
+	for the average personal key.</li>
+	<li>An expiration is useful to force people to change encryption
+	keys periodically.  This means that even if one of your keys is
+	cracked, only a portion of your communications will be
+	compromised.</li>
+	<li>Note that the expiration only applies to new uses of the key.
+	Items encrypted with a key before it expires can still be
+	decrypted with the related private key after the public has
+	expired.</li>
+      </ul>
+      <li>Next, you must enter your personal information.</li>
+      <ul>
+	<li>"Real name" should be fairly obvious.  This should be at least
+	your first and last names.  Nicknames are often acceptable if
+	they're unambiguous enough.  Initials will probably not be
+	acceptable to most people who care about the name.  Some uses may
+	require your full legal name.</li>
+	<li>"Email address" should be equally obvious.  Use your the main
+	email address from which you expect to be doing most of your PGP
+	work.</li>
+	<li>"Comment" is a field for further clarifying the purpose of
+	this key.  If, for example, you have both work and personal keys,
+	you could add a comment to each, indicating which is which.</li>
+	<li>Note that any number of these may be omitted.  You can specify
+	an email address with no name or vice-versa, if you feel it's
+	appropriate.  (Note that some people may be unwilling to sign your
+	key in these cases.)</li>
+      </ul>
+      <li>Lastly, you need to enter a passphrase.</li>
+      <ul>
+	<li>The passphrase can (and should) be an actual phrase.
+	Generally, the longer the phrase is, the better, as it's harder to
+	guess that way.</li>
+	<li>The passphrase should also, however, be something that you'll
+	remember and will be able to type easily.  You'll have to find
+	your own balance between the two.</li>
+      </ul>
+      <li>After all of the information is entered, gpg will go about
+      making your keypair.  Under Linux, it uses /dev/random, which is a
+      source of truly random data.  (i.e. there is no way to predict ahead
+      of time what the data will be.)  gpg will probably ask you to
+      generate entropy.  Do as it asks (type on the keyboard, move the
+      mouse).  Network activity (e.g. downloading files) helps, too.</li>
+    </ul>
+    <li>When that finishes, congratulations!  You've created your own
+    personal keypair.</li>
+    <li>To admire your new key type '<code>gpg --list-keys "&lt;your
+    name&gt;"</code>'.</li>
+    <ul>
+      <li>You should get output looking like this:
+      <pre>
+pub  1024D/13C62639 2001-12-07 Bob Transformer &lt;moo@moo.org&gt;
+sub  1024g/46AEB2B6 2001-12-07</pre></li>
+      <li>The number after the first slash (13C62639, in my example) is
+      the <i>key ID</i>.  This is a number that uniquely refers to your
+      key.  We'll be using the key ID for many things in the future.</li>
+      <li>Note: gpg will try its best to find the keys you're looking
+      for.  If you give it a key ID, it'l use that key.  If you give it a
+      name or an email address, it will use all of the keys that contain
+      the string you gave it.  ("Phil" matches a <b>lot</b> of the public
+      keys I have.)  Whenever possible, use the key ID to ensure that you
+      don't accidentally use the wrong key.</li>
+    </ul>
+    <li>The final step is to send your key to a public keyserver so that
+    other people can easily get it.</li>
+    <ul>
+      <li>The simplest method is just to run '<code>gpg --keyserver
+      &lt;keyserver&gt; --send-keys &lt;key ID&gt;</code>'.</li>
+      <ul>
+	<li>The best keyserver to use is probably wwwkeys.pgp.net.  The
+	others should synchronize to that one periodically.</li>
+	<li>They don't always sychronize properly, though.  the best
+	solution is to use <a href="recv-keys.htm">recv-keys</a>, a
+	script someone I know wrote to send (and receive) keys from every
+	keyserver.</li>
+      </ul>
+    </ul>
+  </ul>
+  <li>Signing keys</li>
+  <ul>
+    <li>Concepts</li>
+    <ul>
+      <li>Trust is an issue with keys.  Presumably you put your own name
+      on the key you made, but you could just as easily have used someone
+      else's.</li>
+      <li>What guarantee do you have that when you get a key claiming to
+      belong to, say, Phil Gold, that it's really from me?</li>
+      <li>Personal introductions as an example.</li>
+      <ul>
+	<li>Suppose you had never met me before and someone walked up to
+	you and said he was Phil Gold.  Would you believe him?  (You
+	might.  Further suppose that you were going to give me $100.
+	Would you give the money to this person based merely on his claims
+	about his identity?)</li>
+	<li>On the other hand, if someone you trusted introduced me to
+	you, you'd probably be more likely to believe claims about my
+	identity.</li>
+	<li>Public key signing works much the same way.</li>
+      </ul>
+      <li>A signature on a public key works much as a digital signature on
+      some other piece of information--it's a block of data created with a
+      private key that can only be verified with the corresponding public
+      key.</li>
+      <li>The meaning is a little different, though.  If you sign an
+      email, the signature is an indication that the email actually came
+      from you.  If you sign a public key, the signature is an indication
+      that you will vouch for the identity of the key's owner.</li>
+      <li>Example:  I wish to converse with Nick.  I get Nick's public key
+      from a keyserver, but I've had no personal verification that the key
+      really belongs to him.  However, I also have Ray's public key and
+      I've verified its validity.  I also trust Ray to sign keys.  If Ray
+      has signed the key I downloaded, then I have a reasonable assurance
+      that the key really does belong to Nick, as it claims.</li>
+      <ul>
+	<li>NB: GPG is really flexible about trust.  It has four settings
+	for your trust of the key's owner: full, marginal, none, and
+	unknown (which is the same as none).  You can adjust the number of
+	full and marginal signatures needed to trust a key you haven't
+	yourself signed.  For the record, I use the default settings (one
+	full or three marginal) but am very parsimonious with placing even
+	marginal trust in other people.</li>
+      </ul>
+    </ul>
+    <li>Actually signing a key</li>
+    <ul>
+      <li>When you sign a key, you are declaring to the world that you
+      believe the key actually belongs to the person it claims to.  Be
+      careful, then, in what you sign.</li>
+      <li>Steps for verifying key validity.</li>
+      <ul>
+	<li>Talk to the person in a difficult-to-fake environment.  Face
+	to face is best.  Barring that, a telephone conversation is
+	probably good.  Pretty much anything online is right out.</li>
+	<li>Verify that the person is who they claim they are.  This is
+	easy if you already know them or can be introduced by someone you
+	trust.  Beyond that, you can check things like photo IDs and trust
+	them if you have trust in the issuing institution.</li>
+	<li>Get the person's key information.  You should get the person's
+	key ID and fingerprint.</li>
+	<ul>
+	  <li>The key ID has been mentioned previously.</li>
+	  <li>The fingerprint is a number derived from the key
+	  mathematically.  It uniquely identifies the key, much as your
+	  fingerprints identify you.</li>
+	  <ul>
+	    <li>NB: It is theoretically possible for two different keys to
+	    have the same fingerprint.  It is, however, statistically
+	    <b>very</b> unlikely that this would happen.  In addition,
+	    there is no known way to create a key with a specific
+	    fingerprint, which is why the fingerprint is a good method for
+	    verifying keys.</li>
+	  </ul>
+	</ul>
+	<li>Go home.</li>
+	<li>Once home, if you don't have the other person's key, get it
+	from the keyserver, either via <a href="recv-keys.htm">recv-keys</a>
+	or '<code>gpg --keyserver &lt;keyserver&gt; --recv-keys &lt;key id&gt;</code>'</li>
+	<li>Now that you have the key, check its fingerprint</li>
+	<ul>
+	  <li>The command to do this in gpg is '<code>gpg --fingerprint
+	  &lt;key ID&gt;</code>'.</li>
+	  <li>gpg will print something like
+	  <pre>
+pub  1024D/13C62639 2001-12-07 Bob Transformer &lt;moo@moo.org&gt;
+     Key fingerprint = 89F4 5D99 CD48 EC3E 40CA  3D31 F1BF FFE2 13C6 2639
+sub  1024g/46AEB2B6 2001-12-07</pre></li>
+          <li>Again, the key ID is the number after the first slash.  The
+          fingerprint is the string of numbers after the equal sign on the
+          second line.</li>
+	</ul>
+	<li>If the key ID and the fingerprint you were given match the
+	ones on your computer, you can be reasonably assured that you have
+	the right key.</li>
+      </ul>
+      <li>Once you've determined that the key is valid and belongs to its
+      claimed owner, you can actually sign it.</li>
+      <ul>
+	<li>The command to do this is '<code>gpg --sign-key &lt;key
+	ID&gt;</code>'.</li>
+	<li>GPG will show you the key information, including the key's
+	fingerprint.  You can double check the information at this point
+	if you're being paranoid.</li>
+	<li>Next, you'll be asked how careful you have been in your
+	verification of the person's identity.  The default answer is
+	probably safe, but using the others as degrees of trust is useful,
+	presuming you have a set policy for signing keys.</li>
+	<ul>
+	  <li>If you're going to use the different levels of
+	  certification, you should use a policy URL.  You may
+	  <a href="policy.htm">look at mine</a> for an example.</li>
+	</ul>
+	<li>Finally, GPG will ask you if you're sure.  If you're certain
+	you want to sign the key, say yes then enter your key's
+	passphrase.</li>
+      </ul>
+      <li>After you've signed the key, you should send it to the OpenPGP
+      keyservers so that when other people get that key they'll get your
+      signature with it.</li>
+      <ul>
+	<li>Again, use of <a href="recv-keys.htm">recv-keys</a> is
+	recommended for sending the key, but '<code>gpg --keyserver
+	&lt;keyserver&gt; --send-keys &lt;key ID&gt;</code>' will also
+	work.</li>
+	<li>Note that the keyservers are smart about signatures.  When you
+	send a key that the server already has, it will merge any new
+	signatures (and uids and revocations, but I haven't covered those)
+	into the existing key.  Thus, two different people can grab a key
+	at the same time, sign their local copies, and send them back in
+	and the keyserver will end up with a single key with both
+	signatures.</li>
+      </ul>
+    </ul>
+  </ul>
+  <li>How to use your PGP key.</li>
+  <ul>
+    <li>Command line usage</li>
+    <ul>
+      <li>man page -- very "detailed", but the ultimate reference.</li>
+      <li>encrypting files</li>
+      <ul>
+	<li><code>gpg --encrypt &lt;file&gt;</code></li>
+	<ul>
+	  <li>Will ask for recipients.</li>
+	  <li>If a recipient matches multiple keys, only the first match
+	  is used.</li>
+	  <li>Result with be in <code>&lt;file&gt;.gpg</code> and will be
+	  binary data.  Send that file to the other person.</li>
+	</ul>
+	<li><code>gpg --recipient &lt;person&gt; --armor --encrypt
+	&lt;file&gt;</code></li>
+	<ul>
+	  <li>Recipient on command line, so does not ask anything.</li>
+	  <li>Again, if more than one match, first match is used.</li>
+	  <li><code>--recipient</code> may be used multiple times to
+	  specify multiple recipients.</li>
+	  <li><code>--armor</code> creates file in ASCII text.</li>
+	  <li>Result will be in <code>&lt;file&gt;.asc</code>.</li>
+	</ul>
+      </ul>
+      <li>decrypting files</li>
+      <ul>
+	<li><code>gpg &lt;file&gt;</code></li>
+	<ul>
+	  <li>Will figure out file is encrypted and attempt to
+	  decrypt.</li>
+	  <li>Will ask for passphrase on your private key so it can
+	  decrypt.</li>
+	  <li>Result will be <code>&lt;file&gt;</code> with
+	  <code>.asc</code> or <code>.gpg</code> extension removed.</li>
+	  <li>If file is ASCII-armored, gpg will extract the message, even
+	  if there's other text around it.  (So you can give it an entire
+	  email and it'll ignore the email headers and such.)</li>
+	</ul>
+	<li><code>gpg --decrypt &lt;file&gt;</code></li>
+	<ul>
+	  <li>Same as above, but decrypted data is send to standard
+	  output.</li>
+	</ul>
+	<li><code>gpg --output &lt;other filename&gt; --decrypt
+	&lt;file&gt;</code></li>
+	<ul>
+	  <li>Decrypts and puts result into file of your choosing.</li>
+	</ul>
+      </ul>
+      <li>signing files</li>
+      <ul>
+	<li><code>gpg --sign &lt;file&gt;</code></li>
+	<ul>
+	  <li>Asks for your passphrase, then signs the file.</li>
+	  <li>Result is in <code>&lt;file&gt;.gpg</code> and is in binary
+	  format.</li>
+	</ul>
+	<li><code>gpg --clearsign &lt;file&gt;</code></li>
+	<ul>
+	  <li>Leaves text document readable and places signature in ASCII
+	  text at the bottom.</li>
+	  <li>Result is in <code>&lt;file&gt;.asc</code>.</li>
+	</ul>
+	<li><code>gpg --detach-sign &lt;file&gt;</code></li>
+	<ul>
+	  <li>Creates a file named <code>&lt;file&gt;.sig</code> that
+	  contains just the signature.</li>
+	  <li>Both the original file and the signature file are required
+	  to verify the signature.</li>
+	</ul>
+      </ul>
+      <li>verifying signatures</li>
+      <ul>
+	<li><code>gpg &lt;file&gt;</code></li>
+	<ul>
+	  <li>gpg will figure out that the file is a signature and verify
+	  it.</li>
+	  <li>If the signature was a regular or clear signature, the
+	  original file will be created, with a name based on
+	  <code>&lt;file&gt;</code>, less the <code>.gpg</code> or
+	  <code>.asc</code> extension.</li>
+	  <li>If the signature was a detached signature, the original file
+	  must exist, with the same name as the signature file (without
+	  the <code>.sig</code> extension), and gpg will just tell you
+	  whether the signature matches or not.</li>
+	</ul>
+      </ul>
+      <li>[finding other people's keys]</li>
+    </ul>
+    <li>[~/.gnupg/options]</li>
+    <li>MUAs</li>
+    <ul>
+      <li>mutt</li>
+      <ul>
+	<li>Support is integrated already.  [in Debian; others need
+	additional stuff?]</li>
+      </ul>
+      <li>pine</li>
+      <ul>
+	<li>Nothing native; needs an add-on.</li>
+	<li><a href="http://www.megaloman.com/~hany/software/pinepgp/stable.html">
+	PinePGP</a> seems the best choice.</li>
+	<li><a href="http://pgpenvelope.sourceforge.net/">pgpenvelope</a></li>
+	<li><a href="http://quantumlab.net/pine_privacy_guard/">Pine
+	Privacy Guard</a></li>
+      </ul>
+      <li>Mozilla/Netscape Navigator</li>
+      <ul>
+	<li><a href="http://enigmail.mozdev.org/">Enigmail</a></li>
+      </ul>
+      <li>Eudora</li>
+      <ul>
+	<li>Commercial PGP supports.</li>
+      </ul>
+      <li>Outlook</li>
+      <ul>
+	<li>Avoid like the plague, if at all possible.</li>
+	<li>Bad support for standards.</li>
+      </ul>
+    </ul>
+  </ul>
+  <li>Further information</li>
+  <ul>
+    <li><a href="http://www.gnupg.org/">The GNU Privacy Guard home
+    page</a></li>
+    <ul>
+      <li>Also, the <a href="http://www.gnupg.org/faq.html">GnuPG
+      FAQ</a>,</li>
+      <li>the <a href="http://www.dewinter.com/gnupg_howto/english/">GnuPG
+      mini-HOWTO</a>,</li>
+      <li>and the <a href="http://www.gnupg.org/gph/en/manual.html">GnuPG
+      User Guide</a>.</li>
+    </ul>
+    <li><a href="http://rfc.net/rfc2440.html">RFC 2440</a>, which describes the
+    OpenPGP protocol.</li>
+    <li><a href="http://www.pgp.net/">www.pgp.net</a>, which contains
+    various information about PGP and the OpenPGP keyservers.</li>
+    <li>The GnuPG <a href="http://www.cryptnet.net/fdp/crypto/gpg-party.html">
+    Keysigning Party HOWTO</a>.
+    </li><li>"<a href="http://www.chaosreigns.com/code/sig2dot/">Graphing the
+    Debian Keyring Web of Trust</a>", a page that describes (and contains
+    tools for) graphing a web of trust.</li>
+    <li><a href="http://www.diceware.com/">Diceware</a>, a nice system for
+    generating (hopefully) memorable passphrases.</li>
+  </ul>
+</ul>
+
+<p>That should about cover it.  Please
+<a href="mailto:phil_g@pobox.com">email me</a> if you have any questions,
+comments, or suggestions about this tutorial.</p>
+
+<hr>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="index.htm">Back to PGP page.</a><br>
+<a href="../index.htm">Back to main page.</a><br>
+</p>
+</body></html>

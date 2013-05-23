@@ -1,0 +1,434 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scape=1.0; user-scalable=false;">
+  <link rel="apple-touch-icon" href="/phil/avatar-iphone.png">
+  <title>07 Oct 2011  :: Phil! Gold</title>
+
+  <meta name="DC.title" content="Phil! Gold">
+
+  <link rel="openid.server" href="http://www.livejournal.com/openid/server.bml">
+  <link rel="openid.delegate" href="http://phil-g.livejournal.com/">
+
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://aperiodic.net/phil/archives/index.rss">
+  <link rel="stylesheet" type="text/css" href="../../../../default.css">
+  <link rel="stylesheet" type="text/css" href="../../../../blog.css">
+
+</head>
+
+<body>
+
+<div id="header">
+  <h1>Phil! Gold :: 07 Oct 2011 </h1>
+</div>
+
+<div id="content">
+<h2>Fri, 07 Oct 2011</h2>
+
+<div class="story-title" id="so-many-dolfields">
+  <h3>Why are there so many Dolfield Roads?</h3>
+  <div class="title-links">
+    6:34PM |
+    <a href="../../../Geekery.htm" >Geekery</a> |
+    
+    <a href="../../../Geekery/so-many-dolfields.htm" title="permalink for Why are there so many Dolfield Roads?" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>A question that perturbed me when I lived in Owings Mills was why there
+were so many roads named "Dolfield".  There are three different Dolfield
+Roads, one South Dolfield Road, and three Dolfield Boulevards.  I finally
+got around to researching the question, and now I share the answer (to the
+degreee that I have one) with everyone.</p>
+
+<p>This is a map of Dolfield Road, past and present:</p>
+
+<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+
+<script type="text/javascript">
+  // Start position for the map
+  var dolfield_rd_lat=39.4077329;
+  var dolfield_rd_lon=-76.80413865;
+  var dolfield_rd_zoom=15;
+
+  var dolfield_rd_map;  
+  function init_dolfield_rd() {
+    dolfield_rd_map = new OpenLayers.Map ("dolfield_rd_map", {
+        controls:[
+            new OpenLayers.Control.Navigation(),
+            new OpenLayers.Control.PanZoom(),
+            new OpenLayers.Control.Attribution(),
+            new OpenLayers.Control.LayerSwitcher()],
+        maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+        maxResolution: 156543.0399,
+        numZoomLevels: 19,
+        units: 'm',
+        projection: new OpenLayers.Projection("EPSG:900913"),
+        displayProjection: new OpenLayers.Projection("EPSG:4326")
+    } );
+
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM("MapQuest", ["http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile2.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile3.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile4.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png"], {numZoomLevels: 19}));
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM.Osmarender("Osmarender"));
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM.CycleMap("CycleMap"));
+
+    dolfield_rd_map.addLayer(
+      new OpenLayers.Layer.Vector("Dolfield Rd (original)",
+                       { style: { strokeColor: "blue", strokeWidth: 6 },
+                         projection: new OpenLayers.Projection("EPSG:4326"),
+                         strategies: [new OpenLayers.Strategy.Fixed()],
+                         protocol: new OpenLayers.Protocol.HTTP({
+                                         url: "/phil/gpx/dolfield-rd-original.gpx",
+                                         format: new OpenLayers.Format.GPX()})}));
+    dolfield_rd_map.addLayer(
+      new OpenLayers.Layer.Vector("Dolfield Rd (remaining)",
+                       { style: { strokeColor: "lightblue", strokeWidth: 3 },
+                         projection: new OpenLayers.Projection("EPSG:4326"),
+                         strategies: [new OpenLayers.Strategy.Fixed()],
+                         protocol: new OpenLayers.Protocol.HTTP({
+                                         url: "/phil/gpx/dolfield-rd-remaining.gpx",
+                                         format: new OpenLayers.Format.GPX()})}));
+    dolfield_rd_map.addLayer(
+      new OpenLayers.Layer.Vector("Red Run Stream Valley Trail",
+                       { style: { strokeColor: "lawngreen", strokeWidth: 3 },
+                         projection: new OpenLayers.Projection("EPSG:4326"),
+                         strategies: [new OpenLayers.Strategy.Fixed()],
+                         protocol: new OpenLayers.Protocol.HTTP({
+                                         url: "/phil/gpx/red-run-stream-valley-trail.gpx",
+                                         format: new OpenLayers.Format.GPX()})}));
+
+    if (!dolfield_rd_map.getCenter()) {
+      var dolfield_rd_lonLat = new OpenLayers.LonLat(dolfield_rd_lon, dolfield_rd_lat).transform(new OpenLayers.Projection("EPSG:4326"), dolfield_rd_map.getProjectionObject());
+      dolfield_rd_map.setCenter(dolfield_rd_lonLat, dolfield_rd_zoom);
+    }
+  }
+</script>
+
+<div id="dolfield_rd_map" style="height: 512px"></div>
+
+<script>init_dolfield_rd();</script>
+
+<p>The thick, dark blue line is where Dolfield Road once ran.  At one point,
+it connected Painters Mill Road and Deer Park Road.</p>
+
+<p>The thinner, light blue line shows where Dolfield Road, in all its
+parts, runs today.  When Interstate 795 was built, Dolfield Road was cut
+in two, as happened to many roads during the construation of the
+Interstate system.  At the same time, part of the eastern portion of
+Dolfield Road was diverted to make room for the ramps from Owings Mills
+Boulevard to Interstate 795.  The section of Dolfield Road south of Owings
+Mills Boulevard was renamed South Dolfield Road, for reasons I cannot
+find.</p>
+
+<p>At some point--I cannot tell when, exactly--the chunk of Dolfield Road
+that extends from present-day Red Run Boulevard to Pleasant Hill Road was
+closed, though I was unable to find out why.  The small section between
+Red Run Boulevard and Interstate 795 now serves as an access road to a SHA
+facility, and the rest of the closed section has been turned into a
+hiking/biking trail (colored in light green on the map).  Finally, the
+section of Dolfield Road just west of Pleasant Hill Road was realigned
+when Dolfield Boulevard was built.</p>
+
+<p>Here's a map of Dolfield Boulevard:</p>
+
+<script type="text/javascript">
+  // Start position for the map
+  var dolfield_blvd_lat=39.4246189;
+  var dolfield_blvd_lon=-76.80318905;
+  var dolfield_blvd_zoom=13;
+
+  var dolfield_blvd_map;  
+  function init_dolfield_blvd() {
+    dolfield_blvd_map = new OpenLayers.Map ("dolfield_blvd_map", {
+        controls:[
+            new OpenLayers.Control.Navigation(),
+            new OpenLayers.Control.PanZoom(),
+            new OpenLayers.Control.Attribution(),
+            new OpenLayers.Control.LayerSwitcher()],
+        maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+        maxResolution: 156543.0399,
+        numZoomLevels: 19,
+        units: 'm',
+        projection: new OpenLayers.Projection("EPSG:900913"),
+        displayProjection: new OpenLayers.Projection("EPSG:4326")
+    } );
+
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM("MapQuest", ["http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile2.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile3.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile4.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png"], {numZoomLevels: 19}));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM.Osmarender("Osmarender"));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM.CycleMap("CycleMap"));
+
+    dolfield_blvd_map.addLayer(
+      new OpenLayers.Layer.GML("Dolfield Blvd (proposed)", "/phil/gpx/dolfield-blvd-proposed.gpx",
+                       { format: OpenLayers.Format.GPX,
+                         style: {strokeColor: "purple", strokeWidth: 6},
+                         projection: new OpenLayers.Projection("EPSG:4326")}));
+    dolfield_blvd_map.addLayer(
+      new OpenLayers.Layer.GML("Dolfield Blvd (fully divided)", "/phil/gpx/dolfield-blvd-dualized.gpx",
+                       { format: OpenLayers.Format.GPX,
+                         style: {strokeColor: "plum", strokeWidth: 3},
+                         projection: new OpenLayers.Projection("EPSG:4326")}));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.GML("Dolfield Blvd (undivided)", "/phil/gpx/dolfield-blvd-single.gpx",
+                       { format: OpenLayers.Format.GPX,
+                         style: {strokeColor: "pink", strokeWidth: 3},
+                         projection: new OpenLayers.Projection("EPSG:4326")}));
+
+    if (!dolfield_blvd_map.getCenter()) {
+      var dolfield_blvd_lonLat = new OpenLayers.LonLat(dolfield_blvd_lon, dolfield_blvd_lat).transform(new OpenLayers.Projection("EPSG:4326"), dolfield_blvd_map.getProjectionObject());
+      dolfield_blvd_map.setCenter(dolfield_blvd_lonLat, dolfield_blvd_zoom);
+    }
+  }
+</script>
+
+<div id="dolfield_blvd_map" style="height: 512px"></div>
+
+<script>init_dolfield_blvd();</script>
+
+<p>At some point in the past, the county planned to build a road named
+Dolfield Boulevard that would connect Owings Mills New Town with the
+eastern area of Reisterstown, both areas that were slated for new
+development.  The road was planned to have two lanes in each direction
+with a raised median dividing the road.  The dark purple line on the above
+map shows where it was to have gone, as far as I can tell.  I'm not sure
+whether the original plans included anything further north, though it
+might have made sense to connect it to Owings Mills Boulevard.</p>
+
+<p>Unfortunately for the county, a number of people living in the proposed
+path of the new road put up sufficient objections that the project
+stalled.  Portions along Reisterstown Road and Academy Avenue were built
+and, in both cases, partly divided and partly not--the light purple
+lines are the divided sections and the pink lines are the undivided
+sections.  Furthermore, the southern end of Dolfield Boulevard was built
+without incident as part of the development of Owings Mills New Town,
+though part of Pleasant Hill Road was rechristened Dolfield Boulevard but
+left undivided.</p>
+
+<p>From what I can tell, the county never entirely abandoned its plans for
+Dolfield Boulevard, but they seems to be shelved indefinitely.  Separately
+from those plans, they are currently considering adding an interchange
+between Dolfield Boulevard and Interstate 795 (which would have been
+really convenient for me if it had been in place when I lived there).</p>
+
+<p>So there are three sections of Dolfield Road (and a South Dolfield Road)
+because Interstate 795 and other factors caused a former road to be split
+into pieces, and there are three sections of Dolfield Boulevard because
+that's as far as the county has gotten on the plans for a new road.  This
+ends today's episode of "I'm a geek and will research anything that
+catches my fancy".</p>
+
+
+</div>
+
+<div id="sidebar">
+  <h2>Static</h2>
+  <ul>
+    <li><a href="../../../../prompt/index.htm">zsh prompt</a></li>
+    <li><a href="../../../../pgp/index.htm">PGP</a></li>
+    <li><a href="../../../../ssh/index.htm">SSH</a></li>
+    <li><a href="../../../../MTA/index.htm">MTA</a></li>
+    <li><a href="../../../../tutorials/index.htm">tutorials</a></li>
+    <li><a href="../../../../configs/index.htm">config files</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/sets/1671829/">desktop</a></li>
+    <li><a href="http://www.librarything.com/catalog/asciiphil">books I own</a></li>
+    <li><a href="../../../../stuff/index.htm">stuff I'm giving away</a></li>
+    <li><a href="../../../../drwho/index.htm">Dr. Who eps I have</a></li>
+    <li><a href="http://del.icio.us/phil_g">bookmarks</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/">photos</a></li>
+    <li><a href="../../../../about.htm">about</a></li>
+  </ul>
+
+  <h2>Directory</h2>
+  <ul class="categories">
+<li class="this-category">Root (134)
+<ul>
+<li><a href="../../../Books/index.htm">Books</a> (31)
+</li>
+<li><a href="../../../Events/index.htm">Events</a> (7)
+<ul>
+<li><a href="../../../Events/Burning_Man/index.htm">Burning Man</a> (3)
+</li>
+<li><a href="../../../Events/Camping/index.htm">Camping</a> (2)
+</li>
+<li><a href="../../../Events/PDF/index.htm">PDF</a> (2)
+</li>
+</ul>
+</li>
+<li><a href="../../../Geekery/index.htm">Geekery</a> (30)
+<ul>
+<li><a href="../../../Geekery/Test/index.htm">Test</a> (3)
+</li>
+</ul>
+</li>
+<li><a href="../../../General/index.htm">General</a> (22)
+</li>
+<li><a href="../../../Links/index.htm">Links</a> (12)
+<ul>
+<li><a href="../../../Links/Slashdot/index.htm">Slashdot</a> (1)
+</li>
+</ul>
+</li>
+<li><a href="../../../MTA/index.htm">MTA</a> (22)
+</li>
+<li><a href="../../../Recipes/index.htm">Recipes</a> (4)
+</li>
+<li><a href="../../../Video_Games/index.htm">Video Games</a> (6)
+<ul>
+<li><a href="../../../Video_Games/FFXI/index.htm">FFXI</a> (1)
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h2>Archive</h2>
+  <table class="month-calendar"><caption class="month-calendar-head"><a title="September 2011 (1)" href="../../09/index.htm">&larr;</a><a title="October 2011 (1)" href="../index.htm">October</a><a title="November 2012 (1)" href="../../../2012/11/index.htm">&rarr;</a></caption>
+    <tr>
+      <th class="month-calendar-day-head Sunday">Sun</th>
+      <th class="month-calendar-day-head Monday">Mon</th>
+      <th class="month-calendar-day-head Tuesday">Tue</th>
+      <th class="month-calendar-day-head Wednesday">Wed</th>
+      <th class="month-calendar-day-head Thursday">Thu</th>
+      <th class="month-calendar-day-head Friday">Fri</th>
+      <th class="month-calendar-day-head Saturday">Sat</th>
+    </tr>
+    <tr>
+      <td class="month-calendar-day-noday Sunday">&nbsp;</td>
+      <td class="month-calendar-day-noday Monday">&nbsp;</td>
+      <td class="month-calendar-day-noday Tuesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Wednesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Thursday">&nbsp;</td>
+      <td class="month-calendar-day-noday Friday">&nbsp;</td>
+<td class="month-calendar-day-nolink Saturday">1</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">2</td>
+<td class="month-calendar-day-nolink Monday">3</td>
+<td class="month-calendar-day-nolink Tuesday">4</td>
+<td class="month-calendar-day-nolink Wednesday">5</td>
+<td class="month-calendar-day-nolink Thursday">6</td>
+<td class="month-calendar-day-this-day Friday"><a title="Friday, 7 October 2011 (current) (1)" href="index.htm">7</a></td>
+<td class="month-calendar-day-nolink Saturday">8</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">9</td>
+<td class="month-calendar-day-nolink Monday">10</td>
+<td class="month-calendar-day-nolink Tuesday">11</td>
+<td class="month-calendar-day-nolink Wednesday">12</td>
+<td class="month-calendar-day-nolink Thursday">13</td>
+<td class="month-calendar-day-nolink Friday">14</td>
+<td class="month-calendar-day-nolink Saturday">15</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">16</td>
+<td class="month-calendar-day-nolink Monday">17</td>
+<td class="month-calendar-day-nolink Tuesday">18</td>
+<td class="month-calendar-day-nolink Wednesday">19</td>
+<td class="month-calendar-day-nolink Thursday">20</td>
+<td class="month-calendar-day-nolink Friday">21</td>
+<td class="month-calendar-day-nolink Saturday">22</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">23</td>
+<td class="month-calendar-day-nolink Monday">24</td>
+<td class="month-calendar-day-nolink Tuesday">25</td>
+<td class="month-calendar-day-nolink Wednesday">26</td>
+<td class="month-calendar-day-nolink Thursday">27</td>
+<td class="month-calendar-day-nolink Friday">28</td>
+<td class="month-calendar-day-nolink Saturday">29</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">30</td>
+<td class="month-calendar-day-nolink Monday">31</td>
+      <td class="month-calendar-day-noday Tuesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Wednesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Thursday">&nbsp;</td>
+      <td class="month-calendar-day-noday Friday">&nbsp;</td>
+      <td class="month-calendar-day-noday Saturday">&nbsp;</td>
+</tr>
+</table>
+
+  <table class="year-calendar"><caption class="year-calendar-head"><a title="2010 (1)" href="../../../2010/index.htm">&larr;</a><a title="2011 (3)" href="../../index.htm">2011</a><a title="2012 (1)" href="../../../2012/index.htm">&rarr;</a></caption><tr><th class="year-calendar-subhead" colspan="6">Months</th></tr>
+<tr>
+<td class="year-calendar-month-nolink">Jan</td>
+<td class="year-calendar-month-nolink">Feb</td>
+<td class="year-calendar-month-nolink">Mar</td>
+<td class="year-calendar-month-nolink">Apr</td>
+<td class="year-calendar-month-link"><a title="May 2011 (1)" href="../../05/index.htm">May</a></td>
+<td class="year-calendar-month-nolink">Jun</td>
+</tr>
+<tr>
+<td class="year-calendar-month-nolink">Jul</td>
+<td class="year-calendar-month-nolink">Aug</td>
+<td class="year-calendar-month-link"><a title="September 2011 (1)" href="../../09/index.htm">Sep</a></td>
+<td class="year-calendar-this-month"><a title="October 2011 (1)" href="../index.htm">Oct</a></td><td class="year-calendar-month-nolink">Nov</td>
+<td class="year-calendar-month-nolink">Dec</td>
+</tr>
+</table>
+
+
+  <h2>Search</h2>
+  <form method="GET" action="http://www.google.com/custom">
+    <p style="text-align: center">
+      <input type="hidden" name="domains" value="aperiodic.net">
+      <input type="hidden" name="cof" VALUE="GALT:#66CC6;S:http://aperiodic.net/phil/;GL:2;VLC:#CC66CC;AH:center;BGC:#000000;LC:#6666CC;GFNT:#666666;ALC:#CC6666;T:#CCCCCC;GIMP:#FFFFFF;AWFID:d3f1afbc39619250;">
+      <input type="hidden" name="sitesearch" value="aperiodic.net">
+      <input name="q" type="text" size="25" maxlength="255" style="width: 10em"><br>
+      Powered by <a href="http://www.google.com/"><span class="google-G1">G</span><span class="google-o1">o</span><span class="google-o2">o</span><span class="google-g2">g</span><span class="google-l">l</span><span class="google-e">e</span></a>
+    </p>
+  </form>
+
+
+  <h2>Currently Reading</h2>
+
+  <div id="wb55a1f3ca64835526140c06560a0205e"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wb55a1f3ca64835526140c06560a0205e">
+  </script>
+
+  <h2>Recent Books</h2>
+
+  <div id="wa13cfbb5a4be4d629ebe322b83f1e2f6"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wa13cfbb5a4be4d629ebe322b83f1e2f6">
+  </script>
+
+</div>
+
+<div class="hr"><hr></div>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../../../../index.htm">Back to main page.</a><br>
+</p>
+<ul class="validation">
+  <li>
+  <a href="http://validator.w3.org/check/referer">
+  <img src="http://aperiodic.net/phil/pics/html401.png" alt="Valid HTML 4.01">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://jigsaw.w3.org/css-validator/check/referer">
+  <img src="http://aperiodic.net/phil/pics/validcss.png" alt="Valid CSS 2">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://aperiodic.net/phil/archives/index.rss">
+  <img src="../../../../pics/rss10.png" alt="RSS syndication">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://feedvalidator.org/check?url=http://aperiodic.net/phil/archives/index.rss">
+  <img src="http://aperiodic.net/phil/pics/validrss.png" alt="Valid RSS 1.0">
+  </a>
+  </li>
+
+</ul>
+
+</html>

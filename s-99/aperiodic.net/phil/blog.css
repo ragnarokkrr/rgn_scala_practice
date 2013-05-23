@@ -1,0 +1,186 @@
+/* Stuff just for the blog layout. */
+
+h2 {
+  font-size: large;
+  font-weight: bold;
+  color: #666;
+  margin: 0;
+}
+
+#sidebar h2 { 
+  clear: left;
+  text-align: center;
+  color: #CCC;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
+
+h3 { 
+  font-weight: bold;
+  margin: 0;
+}
+
+#sidebar h3 {
+  clear: left;
+  margin-top: 1em;
+  font-size: medium;
+}
+
+ul { 
+  margin-left: 0;
+  padding-left: 1em;
+}
+
+.hr { 
+  border-top: 4px solid #333;
+  clear: both;
+}
+
+.hr hr {
+  display: none;
+}
+
+#header {
+  height: 4em;
+}
+
+#sidebar { 
+  position: absolute;
+  top: 6em;
+  right: 0.5em;
+  width: 14em;
+  background: #333;
+  margin-left: 1em;
+  padding: 0.5em;
+  border: 2px solid #000;
+  font-size: small;
+}
+
+#content {
+  margin-left: 0;
+  /* Stupid IE */
+  margin-right: 15.5em;
+  voice-family: "\"}\"";
+  voice-family: inherit;
+  margin-right: 12.5em;
+}
+/* And be nice to Opera. */
+body>#content {margin-right: 12.5em;}
+
+/* Don't show navbar on mobile browsers for now. */
+@media only screen and (max-device-width: 320px) {
+    #content {
+        width: 100%;
+        margin-right: 0;
+    }
+    #sidebar {
+        display: none;
+    }
+}
+
+.story-title {
+  padding: 0.2em;
+  background: #333;
+  margin-top: 1em;
+  font-family: "Trebuchet MS", "Verdana", "Arial", sans-serif;
+}
+
+.title-links {
+  font-size: small;
+}
+
+.month-calendar { 
+  width: 100%;
+}
+
+.year-calendar { 
+  width: 100%;
+}
+
+.month-calendar-day-head {
+  font-size: x-small;
+}
+
+.month-calendar-day-this-day { 
+  font-weight: bold;
+}
+
+.month-calendar-day-future { 
+  color: #666;
+}
+
+.year-calendar-this-month { 
+  font-weight: bold;
+}
+
+.year-calendar-month-future {
+  color: #666;
+}
+
+ul.validation {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+ul.validation li { 
+  display: inline;
+  list-style-type: none;
+}
+
+.searchbutton {
+  background-color: inherit;
+  color:            inherit;
+  font-size:        inherit;
+  font-family:      inherit;
+  font-weight:      inherit;
+  border-width:     0;
+}
+
+ul.allconsuming { 
+  list-style-type: none;
+  margin-left: 0;
+  padding-left: 0
+}
+
+ul.allconsuming>li {
+  clear: left;
+  padding: 0.5em 0;
+}
+
+ul.allconsuming>li img {
+  float: left;
+  margin-right: 0.4em;
+}
+
+.LT_itemLast {
+  text-align: left;
+  clear: right;
+  padding-top: 0.5em;
+}
+
+.LT_cover {
+  clear: right;
+  float: right;
+  margin-left: 0.4em;
+}
+
+.LT_powered {
+  text-align: right;
+  clear: right;
+  padding: 0.5em 0 0.5em 0;
+  font-size: 75%;
+}
+
+.LT_powered .favicon {
+  clear: right;
+  float: right;
+  margin-left: 0.4em;
+}
+
+/* Google */
+.google-G1 { color: #0039b6; }
+.google-o1 { color: #c41200; }
+.google-o2 { color: #f3c518; }
+.google-g2 { color: #0039b6; }
+.google-l  { color: #30a72f; }
+.google-e  { color: #c41200; }

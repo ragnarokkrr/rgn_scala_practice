@@ -1,0 +1,543 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html> <head>
+<title>Phil!'s ZSH Prompt</title>
+<link rel="stylesheet" type="text/css" href="../default(1).css">
+<style type="text/css">
+  pre {color: #BBBB77}
+  code {color: #77BB77}
+</style>
+</head>
+
+<body>
+<h1>Phil!'s ZSH Prompt</h1>
+
+<p>In which one geek demonstrates his zsh prompt, which (he hopes) should
+serve as an example of some of the more complicated aspects of zsh.</p>
+
+<p>A while back, <a href="http://slashdot.org">Slashdot</a> had an <a
+href="http://slashdot.org/index.pl?section=askslashdot">Ask Slashdot</a>
+question about
+<a href="http://slashdot.org/article.pl?sid=01/07/06/122259">shell
+prompts</a>.
+<a href="http://slashdot.org/comments.pl?sid=13108&cid=103977">I
+responded</a>, posting a link to 
+<a href="http://www.kuro5hin.org/?op=comments;sid=2001/5/1/215312/2648;cid=42#42">an
+earlier Kuro5hin post</a> I had made on the subject.  Unlike that Kuro5hin
+post, the Slashdot post garnered some attention, so I decided to write up
+how my prompt works.  Since then, I've expanded my prompt to take
+advantage of a lot of zsh stuff, so it should also provide examples to
+people curious about that sort of thing.</p>
+
+<table>
+  <tr>
+    <td><img src="normal(1).png" alt="[normal screenshot]"></td>
+    <td>For the impatient, I have a screenshot and the
+      <a href="http://aperiodic.net/phil/prompt/prompt.txt">prompt command</a>.  For those
+      wanting more detail, I go into it below.
+    </td>
+  </tr>
+</table>
+
+<p>My shell is zsh.  I got the initial idea for this prompt from the
+"termwide" prompt in the
+<a href="http://en.tldp.org/HOWTO/Bash-Prompt-HOWTO/">Bash Prompt HOWTO</a>,
+but had to modify it to work with zsh.  Since then, I've added other
+features (some of which I've also seen in other termwide-based prompts)
+and taken more advantage of zsh's facilities.  This prompt is now fairly
+zsh-specific.</p>
+
+<p>Let's start at the beginning.</p>
+
+<pre>
+function precmd {
+</pre>
+
+<p>There are a number of prompt variables I want to be set before each
+prompt, so I change them in the special zsh function named precmd.
+This is run before the prompt is displayed.</p>
+
+<pre>
+    local TERMWIDTH
+    (( TERMWIDTH = ${COLUMNS} - 1 ))
+</pre>
+
+<p><code>local</code> tells zsh that the given variable should be scoped
+to the current function.  I don't really like cluttering namespaces.</p>
+
+<p>The <code>(( ... ))</code> construct tells zsh to carry out
+mathematical operations.  I set the terminal width to one less that
+the actual width because zsh's right-hand prompt leaves one character
+to its right and I want things to line up.</p>
+
+ <pre>
+    ###
+    # Truncate the path if it's too long.
+
+    PR_FILLBAR=""
+    PR_PWDLEN=""
+
+    local promptsize=${#${(%):---(%n@%m:%l)---()--}}
+    local pwdsize=${#${(%):-%~}}
+
+    if [[ "$promptsize + $pwdsize" -gt $TERMWIDTH ]]; then
+	((PR_PWDLEN=$TERMWIDTH - $promptsize))
+    else
+	PR_FILLBAR="\${(l.(($TERMWIDTH - ($promptsize + $pwdsize)))..${PR_HBAR}.)}"
+    fi
+</pre>
+
+<p>This little section is the one that does the width adjusting.
+The variables that determine string length are ... interesting.  Working
+from the inside out:
+<ul>
+  <li><code>${[varname]:-[string]}</code> returns the value of
+  ${[varname]} normally, but uses [string] instead if ${[varname]} doesn't
+  exist.  <code>${:-[string]}</code> is a quick way to do variable-related
+  things to fixed strings.</li>
+  <li><code>${([flags])[varname]}</code> uses the flags to alter how the
+  value of the variable is handled.  The percent sign causes prompt
+  expansion to be done on the variable.</li>
+  <li>So <code>${(%):-%~}</code> does prompt expansion on the literal
+  string "%~".  (To get just this effect, <code>print -p "%~"</code> would
+  work, too.)</li>
+  <li><code>${#[varname]}</code> gives the length of the value of the
+  variable.  zsh appears to handle the pound sign before applying the
+  (%) flag, so I had to nest the (%) flag in order to get things to
+  happen in the right order.</li>
+</ul>
+</p>
+
+<p>If adding the current directory would make the prompt wider than the
+terminal, I just set $PR_PWDLEN to the length it should be and let zsh
+truncate it.  The actual prompt contains the string
+<code>%$PW_PWDLEN&lt;...&lt;%~%&lt;&lt;</code>.  When zsh encounters a
+prompt escape of the form <code>%[num]&lt;[str]&lt;</code>, it will
+truncate the next part of the prompt until  the next <code>%&lt;&lt;</code>
+or the end of the prompt, whichever comes first.  If truncation is
+necessary, zsh will remove the beginning of the string to be truncated and
+add the [str] supplied so that the entire resulting string will be [num]
+characters long.</p>
+
+<p>(Note that there's also the <code>%[num]&gt;[str]&gt;</code> sequence,
+which does the truncation at the end of the string.)</p>
+
+<p>If the combination of invariant prompt and current directory is not
+wide enough to fill the terminal (this is usually the case), I use another
+variable flag--one a bit more complicated.  The general form of the
+left-hand padding flag is <code>${(l.[len]..[pad1]..[pad2].)[varname]}</code>.
+This pads or truncates ${[varname]} so that the result is exactly [len]
+characters long.  If padding is needed, the shell will use [pad2] once,
+then as many iterations of [pad1] as are needed.  If you don't need
+[pad2], it can be omitted, as can [varname].  I omit both, so the effect
+is that [pad1] is repeated to a length of [len].  The quoting is done so I
+can put variables inside the flag statement.</p>
+
+<table>
+  <tr>
+    <td><img src="truncated(1).png" alt="[screenshot showing truncated path]"></td>
+    <td>Here's a truncated path.</td>
+  </tr>
+</table>
+
+<pre>
+    ###
+    # Get APM info.
+
+    if which ibam > /dev/null; then
+	PR_APM_RESULT=`ibam --percentbattery`
+    elif which apm > /dev/null; then
+	PR_APM_RESULT=`apm`
+    fi
+</pre>
+
+<p>If apm or <a href="http://ibam.sourceforge.net/">ibam</a> is present,
+I'll need its output.  I could do this in the prompt itself, but calling
+programs from within the prompt clobbers the value of $? (return code of
+the last command run), so I call all external programs in precmd(), where
+they can't do any damage.</p>
+
+<pre>
+}
+</pre>
+
+<p>And that's the end of my precmd() function.  Next is preexec(), which
+is only somewhat related to my prompt, but it's here anyway.  preexec() is
+run after you press enter on your command but before the command is
+run.</p>
+
+<pre>
+setopt extended_glob
+preexec () {
+    if [[ "$TERM" == "screen" ]]; then
+	local CMD=${1[(wr)^(*=*|sudo|-*)]}
+	echo -ne "\ek$CMD\e\\"
+    fi
+}
+</pre>
+
+<p>I use <a href="http://www.gnu.org/software/screen/">screen</a> for a
+lot of things.  My preexec() sets the screen window title, if I'm running
+in a screen.  I have fun with variable expansion to get what I want in the
+title, which is the name of the program I'm currently running:</p>
+
+<p>Subscripts for arrays can have flags that affect their behavior, just
+like variables can.  The '(w)' flag causes a regular variable to be
+treated as an array, with each element of the array being a
+whitespace-separated word of the variable's value.  The '(r)' flag changes
+the way the index works.  It returns the first element of the array that
+matches the pattern supplied as the index.  In the pattern (which uses
+extended globbing), '^' negates it, so I get the first element that
+doesn't match.  It skips variable assignment, 'sudo', and program
+options.</p>
+
+<p>The -e option to echo isn't strictly necessary in zsh, but I use it out
+of habit.</p>
+
+<table>
+  <tr>
+    <td><img src="screen(1).png" alt="[screenshot attached to screen session]"></td>
+    <td>I've attached to a running screen session, which has a window list
+      in the caption.  You can see that the current window, 8, is at a
+      prompt, window 9 is running xemacs, and 7 is showing something with
+      less.</td>
+  </tr>
+</table>
+
+<pre>
+setprompt () {
+</pre>
+
+<p>The stuff that only needs to be set once is set in a separate function,
+which I've decided to call setprompt().</p>
+
+<pre>
+    ###
+    # Need this so the prompt will work.
+
+    setopt prompt_subst
+</pre>
+
+<p>prompt_subst is not set by default.  It allows variable substitution to
+take place in the prompt, so I can just change the contents of certain
+variables without recreating the prompt every time.</p>
+
+<pre>
+    ###
+    # See if we can use colors.
+
+    autoload colors zsh/terminfo
+    if [[ "$terminfo[colors]" -ge 8 ]]; then
+	colors
+    fi
+    for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
+        eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
+        eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
+        (( count = $count + 1 ))
+    done
+    PR_NO_COLOUR="%{$terminfo[sgr0]%}"
+</pre>
+
+<p>This section determines whether or not to use color in the prompt.  I
+use terminfo codes to be as portable as possible across different terminal
+types.  And the zsh termcap module provides an associative array for all
+of the terminfo entries for the current terminal. 'sgr0' removes all
+attributes (bold, underline, etc.) from the text.  'bold' turns on bold
+text.  'colors' lists the number of colors the current terminal
+supports.</p>
+
+<p>The colors module provides a function called <code>colors</code>, which
+creates associative arrays $fg and $bg, which contain the
+terminal-appropriate ANSI escape codes for setting the forground and
+background colors, respectively.  Since the arrays are indexed by the
+lowercase versions of the color names, I use the (L) flag in the parameter
+expansion for $color to lower-case the value of that variable.  I've
+noticed that <code>colors</code> seems to always populate the arrays
+regardless of the color support of the terminal, which is why I have
+the test for the number of supported colors.  I fear it may only do
+ANSI colors as well, but I have yet to use zsh on a terminal that
+didn't use ANSI escapes for setting the colors.</p>
+
+<p>The escape codes are surrounded by <code>%{</code> and <code>%}</code>.
+These are zsh prompt escapes that tell the shell to disregard the
+contained characters when determining the length of the prompt.  This
+allows zsh to properly position the cursor.</p>
+
+<table>
+  <tr>
+    <td><img src="nocolor(1).png" alt="[screenshot with monochrome prompt]"></td>
+    <td>Prompt with colors removed.</td>
+  </tr>
+</table>
+
+<pre>
+    ###
+    # See if we can use extended characters to look nicer.
+
+    typeset -A altchar
+    set -A altchar ${(s..)terminfo[acsc]}
+    PR_SET_CHARSET="%{$terminfo[enacs]%}"
+    PR_SHIFT_IN="%{$terminfo[smacs]%}"
+    PR_SHIFT_OUT="%{$terminfo[rmacs]%}"
+    PR_HBAR=${altchar[q]:--}
+    PR_ULCORNER=${altchar[l]:--}
+    PR_LLCORNER=${altchar[m]:--}
+    PR_LRCORNER=${altchar[j]:--}
+    PR_URCORNER=${altchar[k]:--}
+</pre>
+
+<p>Some terminals use fonts that have extended character support.  If they
+do, there should be terminfo entries to: a) enable use of the line-drawing
+character set (enacs), b) enter (smacs) and leave (rmacs) the alternate
+character set, and c) describe the mappings of line drawing characters
+(acsc).  The last needs some additional explanation.  The VT100 used the
+alternate character set with certain lowercase characters to make
+line-drawing characters.  For instance, "q" was a horizontal line.  The
+acsc terminfo string is a series of character pairs, with the first in the
+pair being the vt100 character and the second being the character to get
+the same result in the current terminal.</p>
+
+<p>A zsh associative array is a natural way to get at the appropriate line
+drawing characters.  Associative arrays must be declared before use, so
+that's what the <code>typeset -A</code> does.  (<code>-A</code> is for
+defining an associative array.)  <code>set -A [arrayname]</code> assigns
+values to the array, with keys and value alternating.  (key, value, key,
+value, etc.)  This is exactly how the entries in terminfo are arranged,
+but we need spaces between the entries.  The <code>(s.[pattern].)</code>
+flag causes a variable to be split on every occurence of [pattern].  In my
+case, there is no pattern, so it matches everywhere, splitting between
+every character.</p>
+
+<p><code>${[varname]:-[string]}</code> returns, this time with an actual
+[varname].  So if the terminal doesn't support line drawing characters,
+the prompt will fall back to simple dashes.</p>
+
+<table>
+  <tr>
+    <td><img src="unconnected(1).png" alt="[screenshot showing prompt
+      without ANSI line drawing]"></td>
+    <td>Prompt without line art.</td>
+  </tr>
+</table>
+
+<pre>
+    ###
+    # Decide if we need to set titlebar text.
+
+    case $TERM in
+	xterm*)
+	    PR_TITLEBAR=$'%{\e]0;%(!.-=*[ROOT]*=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\a%}'
+    ;;
+	screen)
+	    PR_TITLEBAR=$'%{\e_screen \005 (\005t) | %(!.-=[ROOT]=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\e\\%}'
+    ;;
+	*)
+	    PR_TITLEBAR=''
+    ;;
+    esac
+</pre>
+
+<p>There are several things going on here. Most generally, I'm setting
+the titlebar text in terminals that support it.  xterm and xterm-alike
+terminal emulators support a particular escape sequence to set their
+titlebar contents.  screen uses a different escape sequence to set its
+hardstatus line.  (And I have my .screenrc set up to display the
+hardstatus in xterm's title bar--details to be linked.)</p>
+
+<p>I'm also using a special zsh prompt escape.
+<code>%([char].[true str].[false str])</code> is a conditional expression.
+If [chr] is an exclamation point, zsh will use [true str] if the current
+uid is that of root and [false str] otherwise.  Since I want to be root as
+little as possible, I want zsh to yell at me a lot to remind me if I
+am.</p>
+
+<p>Finally, the whole string is inside <code>$'...'</code> delimiters.
+This causes the string to be parsed like <code>echo -e</code> would do it
+(so I can put in "\e" instead of literal escape characters).  No other
+expansion is done, which is also what I want--$COLUMNS and $LINES should
+only be processed when the prompt is displayed, to deal with changing
+window sizes.</p>
+
+<table>
+  <tr>
+    <td><img src="titlebar(1).png" alt="[screenshot with normal title bar]"></td>
+    <td>Note the title bar.</td>
+  </tr>
+  <tr>
+    <td><img src="screen-titlebar(1).png" alt="[screenshot with titlebar in
+      screen]"></td> 
+    <td>Here's the same thing, but inside a screen.  Here, the additional
+      screen information is also present in the titlebar.  (There's also
+      my screen caption at the bottom, but that's unrelated to my shell
+      prompt.)</td>
+  </tr>
+  <tr>
+    <td><img src="root-titlebar(1).png" alt="[screenshot with titlebar and
+      user is root]"></td> 
+    <td>And finally, here's the titlebar if I'm root.  (Don't worry about
+      the other changes; I'll get to those.)</td>
+  </tr>
+</table>
+
+<pre>
+    ###
+    # Decide whether to set a screen title
+    if [[ "$TERM" == "screen" ]]; then
+	PR_STITLE=$'%{\ekzsh\e\\%}'
+    else
+	PR_STITLE=''
+    fi
+</pre>
+
+<p>This is the compliment to my preexec() function.  It sets the screen
+title to "zsh" when sitting at a command prompt.</p>
+
+<pre>
+    ###
+    # APM detection
+
+    if which ibam > /dev/null; then
+	PR_APM='$PR_RED${${PR_APM_RESULT[(f)1]}[(w)-2]}%%(${${PR_APM_RESULT[(f)3]}[(w)-1]})$PR_LIGHT_BLUE:'
+    elif which apm > /dev/null; then
+	PR_APM='$PR_RED${PR_APM_RESULT[(w)5,(w)6]/\% /%%}$PR_LIGHT_BLUE:'
+    else
+	PR_APM=''
+    fi
+</pre>
+
+<p>This is for laptops or other computers with batteries.  I assume that
+if apm or ibam is installed, it's meant to be used.  These will result in
+the battery percentage and time left (either to charge or discharge) being
+displayed in the prompt.</p>
+
+<p>With ibam, that information is on two separate lines.  The percentage
+is on the first line, so I use <code>${PR_APM_RESULT[(f)1]}</code> to get
+just that line.  The (f) flag causes the variable to be treated as an
+array, with each line being a separate element.  Then
+<code>${...[(w)-2]}</code> returns the second-to-last word on that line.
+Similar indices retrieve the last word on the third line.</p>
+
+<p>apm is a bit simpler.  Everything is on a single line, so we just grab
+the fifth and sixth words on that line.  When two indices are separated by
+a comma, the result is the range of elements between those two, inclusive.
+This just happens to be a two element range.  Then substitution is
+performed to remove the space between them and to double the percent sign,
+so that prompt expansion witll leave a single, literal percent sign.
+<code>${[varname]/[pattern]/[replacement]}</code> replaces the first
+occurrence of [pattern] with [replacement].
+<code>${[varname]/[pattern]//[replacement]}</code> replaces every
+occurrence.</p>
+
+<table>
+  <tr>
+    <td><img src="apm(1).png" alt="[screenshot with apm info]"></td>
+    <td>Prompt on my laptop, showing 50% battery and just over two hours
+      to finish recharging.  (No, no indication of AC status; that's
+      planned.  (I usually know which it is.))</td>
+  </tr>
+</table>
+
+<pre>
+    ###
+    # Finally, the prompt.
+
+    PROMPT='$PR_SET_CHARSET$PR_STITLE${(e)PR_TITLEBAR}\
+$PR_CYAN$PR_SHIFT_IN$PR_ULCORNER$PR_BLUE$PR_HBAR$PR_SHIFT_OUT(\
+$PR_GREEN%(!.%SROOT%s.%n)$PR_GREEN@%m:%l\
+$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_CYAN$PR_HBAR${(e)PR_FILLBAR}$PR_BLUE$PR_HBAR$PR_SHIFT_OUT(\
+$PR_MAGENTA%$PR_PWDLEN<...<%~%<<\
+$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_CYAN$PR_URCORNER$PR_SHIFT_OUT\
+
+$PR_CYAN$PR_SHIFT_IN$PR_LLCORNER$PR_BLUE$PR_HBAR$PR_SHIFT_OUT(\
+%(?..$PR_LIGHT_RED%?$PR_BLUE:)\
+${(e)PR_APM}$PR_YELLOW%D{%H:%M}\
+$PR_LIGHT_BLUE:%(!.$PR_RED.$PR_WHITE)%#$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
+$PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
+$PR_NO_COLOUR '
+</pre>
+
+<p>Here's where everything is finally assembled.  There are a few things
+in the prompt itself that I haven't yet explained completely:</p>
+
+<p>I'm using the (e) flag on many variables to cause them to undergo
+variable substitution.  (That way, things like $COLUMNS and $LINES are
+updated automatically.)</p>
+
+<p>The <code>%([char].[true str].[false str])</code> setup returns in
+several places.  root gets a slightly more obvious prompt that a normal
+user, as you can see in the previous screenshot.  Also, using a question
+mark as the [char] allows me to display the exit code of the previous
+command.  (The true string would be displayed if the exit code was zero,
+but I have left that string blank.)</p>
+
+<table>
+  <tr>
+    <td><img src="error(1).png"  alt="[screenshot showing a return code]"></td>
+    <td>I ran <code>perl -e 'exit 42'</code>.  It dutifully returned 42,
+      which was then shown in the prompt.</td>
+  </tr>
+</table>
+
+<p>The <code>%D{...}</code> construct results in a date string formatted
+by the contents.  The current hour and minute go on the left side.</p>
+
+<pre>
+    RPROMPT=' $PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_BLUE$PR_HBAR$PR_SHIFT_OUT\
+($PR_YELLOW%D{%a,%b%d}$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_CYAN$PR_LRCORNER$PR_SHIFT_OUT$PR_NO_COLOUR'
+</pre>
+
+<p>zsh supports a right-hand prompt, too.  I started using it just because
+it was there, but I've come to like it.  Putting stuff on the right frees
+up space on the left, and the right-hand prompt simply disappears if the
+command line grows past it.  Thus, I put information that would be useful
+but that I don't need all that often on the right.</p>
+
+<table>
+  <tr>
+    <td><img src="right(1).png" alt="[screenshot with right prompt removed]"></td>
+    <td>The right-hand prompt has been removed to make room for the
+      command line.</td>
+  </tr>
+</table>
+
+<pre>
+    PS2='$PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
+$PR_BLUE$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT(\
+$PR_LIGHT_GREEN%_$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
+$PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT$PR_NO_COLOUR '
+</pre>
+
+<p>PS2 is the continuation prompt.  I define it mostly so it will match
+the main one in color.  In it, I use the <code>%_</code> prompt escape,
+which shows the reason the continuation prompt is being displayed.</p>
+
+<table>
+  <tr>
+    <td><img src="continue(1).png" alt="[screenshot showing continuation prompt]"></td>
+    <td>The continuation prompt, in addition to the main one.</td>
+  </tr>
+</table>
+
+<p>There are two other prompts as well (PS2 and PS3), but I don't bother
+to set them because I use them rarely, it at all.</p>
+
+<pre>
+}
+
+showprompt
+</pre>
+
+<p>And that's the end of the prompt-creating function.  Once it's defined,
+I call it to actually do the setup.</p>
+
+<p>And that's it.  My setup's rather complicated, but it allows me to use
+the same configuration on every computer I use, leaving it up to the shell
+to figure out what to do with itself.  I have put a bit of work into
+putting this thing together, but I have to interact with the command line
+every day, so I think it's worth it.</p>
+
+<hr>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../index.html">Back to main page.</a><br>
+</p>
+</body> </html>

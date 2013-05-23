@@ -1,0 +1,34 @@
+#!/bin/sh
+
+offsite_uuid=609806ea-a86b-4459-ad65-8e2445cdc698
+crypttab=$(grep '^backups' /etc/crypttab)
+target_name=$(echo "$crypttab" | awk '{ print $1 }')
+onsite_uuid=$(echo "$crypttab" | awk '{ print $2 }' | cut -d / -f 5)
+key_file=$(echo "$crypttab" | awk '{ print $3 }')
+
+if [ $(id -u) -ne 0 ]; then
+    echo "This must be run as root." 1>&2
+    exit 1
+fi
+
+if umount /backups; then
+    if cryptsetup luksClose backups; then
+        echo "Remove onsite disk and insert offsite disk."
+        while [ \! -e /dev/disk/by-uuid/$offsite_uuid ]; do
+            sleep 1
+        done
+        if cryptsetup --key-file $key_file luksOpen /dev/disk/by-uuid/$offsite_uuid $target_name; then
+            if mount /backups; then
+                perform-backup
+                umount /backups || exit 1
+            fi
+            cryptsetup luksClose backups || exit 1
+        fi
+        echo "Remove offsite disk and insert onsite disk."
+        while [ \! -e /dev/disk/by-uuid/$onsite_uuid ]; do
+            sleep 1
+        done
+        cryptsetup --key-file $key_file luksOpen /dev/disk/by-uuid/$onsite_uuid $target_name || exit 1
+    fi
+    mount /backups || exit 1
+fi

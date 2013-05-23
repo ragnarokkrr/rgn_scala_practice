@@ -1,0 +1,43 @@
+#!/usr/bin/ruby
+
+require 'set'
+
+max_num = 1
+
+Dir.foreach('/backups') { |file|
+  if file.to_i > max_num then
+    max_num = file.to_i
+  end
+}
+
+
+#to_keep = Set.new(Range.new(max_num - 7, max_num).to_a)
+to_keep = Set.new
+
+start_exp = (Math.log(max_num)/Math.log(2)).to_i
+largest = 2**start_exp
+to_keep.add(largest)
+
+(start_exp - 1).downto(0) { |e|
+  pow = 2**e
+  if largest + pow <= max_num then
+    this_num = largest + pow
+  else
+    this_num = largest - pow
+  end
+  to_keep.add(this_num)
+  if largest < this_num then
+    largest = this_num
+  end
+}
+
+
+Dir.foreach('/backups') { |file|
+  if file == '.' or file == '..' then
+    next
+  end
+  if to_keep.include?(file.to_i) then
+    next
+  end
+  system('rm', '-r', "/backups/#{file}")
+}

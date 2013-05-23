@@ -1,0 +1,1075 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scape=1.0; user-scalable=false;">
+  <link rel="apple-touch-icon" href="/phil/avatar-iphone.png">
+  <title>2008  :: Phil! Gold</title>
+
+  <meta name="DC.title" content="Phil! Gold">
+
+  <link rel="openid.server" href="http://www.livejournal.com/openid/server.bml">
+  <link rel="openid.delegate" href="http://phil-g.livejournal.com/">
+
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://aperiodic.net/phil/archives/index.rss">
+  <link rel="stylesheet" type="text/css" href="../../default.css">
+  <link rel="stylesheet" type="text/css" href="../../blog.css">
+
+</head>
+
+<body>
+
+<div id="header">
+  <h1>Phil! Gold :: 2008 </h1>
+</div>
+
+<div id="content">
+<h2>Mon, 22 Dec 2008</h2>
+
+<div class="story-title" id="backup-ideas">
+  <h3>Backups</h3>
+  <div class="title-links">
+    11:06AM |
+    <a href="../Geekery.htm" >Geekery</a> |
+    
+    <a href="../Geekery/backup-ideas.htm" title="permalink for Backups" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I had a dream last night that the apartment beneath ours caught on fire,
+we had to rush out of the building, and my computer and all of its data
+was destroyed.</p>
+
+<p>I've been pondering a formal backup system for a while now.  (My current
+system involves making sure important files are in a version control
+system and exist on at least my laptop and desktop.  This is pretty
+ad-hoc, inconsistently updated, and not entirely comprehensive.)  I'm
+taking my dream as impetus to actually set something up.  This post is to
+help me organize my thoughts and see if anyone has any comments or
+suggestions.</p>
+
+<h4>My Requirements</h4>
+
+<p>I want to have a full rotating versioned backup system, where I have
+complete daily backups for a recent time span (say a week or so) and more
+sporadic backups back to as much as a year in the past.  Ideally, the
+backups should be stored in a space-efficient manner so unchanged files
+don't take up more space than a single copy would require.  The backups
+should have off-site redundancy.  They should be relatively easy to use;
+they should be fully automated on a day-to-day basis, with notification
+when things go wrong.  Ease of setup would be nice but not necessary.</p>
+
+<h4>My Data</h4>
+
+<p>I currently have about 720 GB of data in my home directory, plus a few
+hundred MB elsewhere on the computer that I'd want to back up.  I also
+have about 11GB in a bzr repository, but all of that should remain
+duplicated in my home directory.  Most of the data in my home directory is
+in media files that I can either replace (rerip CDs, etc.) or live
+without; only 25 GB of it is stuff that I <em>must</em> back up.  (A further 130
+GB is stuff that would be nice to back up, but I can just burn it to DVD
+and consider those my backups; the data is essentially static.)</p>
+
+<h4>JWZ Backups</h4>
+
+<p>The easiest approach is the <a href="http://jwz.livejournal.com/801607.html">JWZ backup solution</a>.  For all of
+my data, that would be two <a href="http://www.newegg.com/Product/Product.aspx?Item#N82E16822136321" title="Western Digital WDE1UBK10000N 1TB Black External Hard Drive - Retail">1 TB external hard drives</a>, for
+about $220.  If I restrict myself to the "must backup" data, I could make
+do with two <a href="http://www.newegg.com/Product/Product.aspx?Item#N82E16822242001" title="cirago CST1060 60GB 5400 RPM External Hard Drive - Retail">60 GB external hard drives</a> for about $80.  In
+either case, I'd keep one drive at the office and swap them periodically.</p>
+
+<p>The advantage of this approach is that I control everything.  I can put
+encrypted volumes on the drives, so if they get lost or stolen, my data
+isn't usable to other people.  I can use rsync with hardlinks between
+datestamped directories to get versioned backups with efficient disk
+usage.  The drawbacks are a modest initial monetary outlay and the need to
+coordinate shuttling drives back and forth.</p>
+
+<h4>Amazon S3</h4>
+
+<p>Another approach is to use <a href="http://aws.amazon.com/s3/">Amazon S3</a> to store my data.  It's offsite
+by definition (and stored among multiple data centers; if I write data to
+it, I can reasonably trust that I'll get that data back).  It's not too
+expensive: at $0.17/GB-month, my minimal backup will cost about
+$3.85/month.  Throw in transfer costs and churn, and I doubt I'd exceed
+$6/month.  (The initial upload would be $2.56.  A full restore would cost
+me $4.36.)  With S3, I would only back up the minimal data; the 130 GB of
+optional backups would cost an additional $20/month, which would exceed
+the cost of the full do-it-myself hard drive backups in one year.</p>
+
+<p>The complication to S3 is that it's just a web-based data storage service;
+you need additional software to make a reasonable backup solution.</p>
+
+<h5>Jungle Disk</h5>
+
+<p>From everything I've read, <a href="http://jungledisk.com/">Jungle Disk</a> is currently the best software
+for storing filesystem data on S3.  It runs on Windows, Mac OSX, and
+Linux, and exports your S3 buckets as a WebDAV disk, which you can then
+mount and treat like an ordinary (unlimited capacity) disk drive.  All
+data is encrypted before it's sent to S3.</p>
+
+<p>I like this approach.  Since it looks like a disk, I can use the same
+rsync setup I would with my own disks, and since the data is encrypted, I
+don't need to worry too much about it being transported over the Internet
+and stored on someone else's servers.  The main drawback is that it's
+proprietary software.  In addition to my principled preference of open
+source software to proprietary, there's also the issue that, especially
+because the data's encrypted, this software would be my only access to my
+backups.  If something went wrong and I couldn't get support from the
+company (e.g. they went out of business), I'd be out of luck.</p>
+
+<p>The software costs $20.  Assuming $5/month on S3, it would take one year
+for this approach to cost more than the minimal get-my-own-disks approach.</p>
+
+<h5>Other S3 software</h5>
+
+<p>I haven't seen anything else that will let me back up to S3 and keep
+versioned backups in a space-efficient manner.  Most of the S3 backup
+software I've seen doesn't do versions, and the few that do don't appear
+to do it space-efficiently.  As always, I have the option of writing my
+own, but that would take a fair amount of time and effort, and I'd be
+likely to give up partway through, continuing to leave myself without
+good backups.</p>
+
+<h4>Conclusion</h4>
+
+<p>Barring any better suggestions from others, I'm leaning towards the two
+smallish hard drives.  They'd pay for themselves after a year of use, and
+I get complete control of my data (for better or worse).  I like the idea
+of using S3, but it's more expensive in the long run, and I'm not
+completely happy with any of the software I've found to use with it.</p>
+
+
+<h2>Wed, 26 Nov 2008</h2>
+
+<div class="story-title" id="truffle-topped-amaretto-brownies">
+  <h3>Truffle-Topped Amaretto Brownies</h3>
+  <div class="title-links">
+    10:04PM |
+    <a href="../Recipes.htm" >Recipes</a> |
+    
+    <a href="../Recipes/truffle-topped-amaretto-brownies.htm" title="permalink for Truffle-Topped Amaretto Brownies" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I made this for Thanksgiving this year, and have already been asked for
+the recipe, even though I haven't had any yet.  So here goes.</p>
+
+<ul>
+<li>Brownie Layer
+<ul>
+<li>1 cup sugar</li>
+<li>1 cup butter</li>
+<li>4 Tablespoons water</li>
+<li>2 cups semi-sweet chocolate morsels (~300g)</li>
+<li>1/2 cup amaretto</li>
+<li>2 teaspoons vanilla extract</li>
+<li>4 eggs</li>
+<li>1 1/2 cups all-purpose flour (~190g)</li>
+<li>1/2 teaspoon baking soda</li>
+<li>1/2 teaspoon salt</li>
+<li>1 cup chopped or sliced almonds (optionally toasted)</li>
+<li>1/2 cup chopped maraschino cherries</li>
+</ul></li>
+<li>Truffle Layer
+<ul>
+<li>8 oz cream cheese, softened</li>
+<li>1/4 cup powdered sugar (30g)</li>
+<li>1 cup semi-sweet chocolate morsels (~150g)</li>
+<li>2-3 Tablespoons amaretto</li>
+</ul></li>
+<li>Topping
+<ul>
+<li>1 cup semi-sweet chocolate morsels (~150g)</li>
+<li>1/2 cup whipping cream</li>
+<li>1 cup sliced almonds, lightly toasted</li>
+<li>maraschino cherries for garnish</li>
+</ul></li>
+</ul>
+
+<h4>Brownie Layer</h4>
+
+<p>Preheat oven to 325°F.  Prepare a 9×13 baking dish.  (I line it with a
+sling of parchment paper and then spray it with Baker's Joy.)</p>
+
+<p>In a saucepan, bring the sugar, butter, and water to a boil.  Remove from
+heat.  Add chocolate, amaretto, and vanilla extract, stirring until
+chocolate is melted.  Add eggs, one at a time, stirring until blended.</p>
+
+<p>Whisk together flour, baking soda, and salt.  Add to chocolate mixture,
+stirring well.  Stir in almonds and cherries.</p>
+
+<p>Pour mixture into baking dish and bake for 42-48 minutes.</p>
+
+<p>Leave them in the dish to cool.</p>
+
+<h4>Truffle Layer</h4>
+
+<p>While the brownies are cooling, beat the cream cheese and powdered sugar
+in a stand mixer on medium speed until the mixture is smooth.  Melt
+chocolate and add with the amaretto to the cream cheese, mixing until
+well-blended.</p>
+
+<p>Spread over brownies and refrigerate until firm, at least 1 hour.</p>
+
+<h4>Topping</h4>
+
+<p>In a saucepan, melt the chocolate in the whipping cream.  Spread evenly
+over the brownies.  Sprinkle with almonds and cherries.  Refrigerate until
+set, at least 1 hour.</p>
+
+<p>Cut into bars and serve.</p>
+
+
+<h2>Wed, 19 Nov 2008</h2>
+
+<div class="story-title" id="more-delphi-type-hate">
+  <h3>More Delphi Type Hate</h3>
+  <div class="title-links">
+    11:36AM |
+    <a href="../Geekery.htm" >Geekery</a> |
+    
+    <a href="../Geekery/more-delphi-type-hate.htm" title="permalink for More Delphi Type Hate" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I have simple needs.  I have a base class with some generic behavior and
+subclasses with specific information for that generic behavior.
+More concretely, the subclasses need to provide the generic behavior with
+an ordered list of things that designate key fields on database tables.
+The best representation of those "things" in Delphi seems to be members of
+an enumeration:</p>
+
+<pre><code>type
+  TKeyField = (kfFoo, kfBar, kfBaz, kfQuux);
+</code></pre>
+
+<p>Since I need the list of fields to be ordered, I need them in an array:</p>
+
+<pre><code>type
+  TKeyFieldArray = array of TKeyField;
+</code></pre>
+
+<p>The declaration of the base class is pretty simple:</p>
+
+<pre><code>type
+  TBaseClass = class
+   protected
+    function GetKeyFieldList : TKeyFieldArray; virtual; abstract;
+   public
+    procedure DoSomethingWithKeyFields;
+  end;
+</code></pre>
+
+<p>As is the declaration of the subclass:</p>
+
+<pre><code>type
+  TSubClass = class(TBaseClass)
+   protected
+    function GetKeyFieldList : TKeyFieldArray; override;
+  end;
+</code></pre>
+
+<p>So where's the problem?  Where's the hate?  The hate is in the
+implementation.  If Delphi had array literals, this would be easy.
+Something like:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+begin
+  Result := [kfBar, kfFoo, kfQuux];
+end;
+</code></pre>
+
+<p>But it doesn't.  It has some special magic for array literals if they're
+the parameter to a function, but not anywhere else.  It does, however,
+have a syntax for array <em>constants</em>.  Perhaps this will work:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+  const
+    keyFieldList : TKeyFieldArray = (kfBar, kfFoo, kfQuux);
+begin
+  Result := keyFieldList;
+end;
+</code></pre>
+
+<p>But no.  That <code>TKeyFieldArray</code> is a <em>dynamic array</em>; Delphi doesn't
+allocate any space for it, so it can't be a constant value.  You have to
+tell Delphi how big each constant array is, even though you're <em>already
+telling it</em> how many elements are in the array.  So perhaps this is the
+solution:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+  const
+    keyFieldList : array[0..2] of TKeyField = (kfBar, kfFoo, kfQuux);
+begin
+  Result := keyFieldList;
+end;
+</code></pre>
+
+<p>But <strong>no</strong>.  Because of Delphi's approach to static typing, those are
+actually <em>different types</em>, and are therefore not assignment-compatible.
+(See <a href="http://philg.hates-software.com/2005/08/12/42d0f129.html" title="Delphi's Type-Bondage">previous</a> <a href="http://philg.hates-software.com/2006/08/25/aa53b474.html" title="Delphi.  Excessive type-bondage.">hates</a> on this subject.)  No, here is the
+code that Delphi makes me type for what should be a one-line function
+implementation:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+begin
+  SetLength(Result, 3);
+  Result[0] := kfBar;
+  Result[1] := kfFoo;
+  Result[2] := kfQuux;
+end;
+</code></pre>
+
+<p>And just earlier this morning I was pleased because I read that Delphi
+2007 (to which I'll soon be upgrading from Delphi 5) has <code>for...in</code> loops,
+so I can finally have <code>foreach</code>.  (Can't get the generics and anonymous
+functions in Delphi 2009, because we need .NET and that's not yet
+available for Delphi 2009.)  Oh, Delphi.  The one hand giveth, and the
+entire rest of the stupid, anemic, pox-ridden language taketh away.</p>
+
+
+<h2>Mon, 17 Nov 2008</h2>
+
+<div class="story-title" id="take-my-stuff">
+  <h3>Take My Stuff!</h3>
+  <div class="title-links">
+    11:12PM |
+    <a href="../General.htm" >General</a> |
+    
+    <a href="../General/take-my-stuff.htm" title="permalink for Take My Stuff!" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I'm divesting myself of a lot of computer-related things that are taking
+up too much space in my apartment.  Take a look at <a href="../../stuff/index.htm">my stuff</a> and
+let me know if there's anything you'd like to take off of my hands.
+Anything left after a couple of weeks will go to the electronics recycling
+center.</p>
+
+
+<h2>Tue, 14 Oct 2008</h2>
+
+<div class="story-title" id="name-change">
+  <h3>Change of Name</h3>
+  <div class="title-links">
+    12:04PM |
+    <a href="../General.htm" >General</a> |
+    
+    <a href="../General/name-change.htm" title="permalink for Change of Name" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>On September 27th, 2008, I got married.  As a consequence of my marriage,
+I gave up my last name and took my wife's, going from Phillip Gregory to
+Phillip Gold.  I've been asked about my decision a lot; this is my
+explanation.</p>
+
+<p>I feel that the prevaling societal standard--the assumption that the woman
+must go through all the work to change her name and give up the identity
+she's had since birth--is unfair and an example of gender inequality.
+Rather than simply make that assumption, Rebecca and I discussed our names
+a lot before the wedding, starting with what we each wanted out of our
+married names, and working from there to a mutual decision.</p>
+
+<p>I wanted us to both have the same name, as symbolic of our marriage.  I
+also didn't want a hyphenated last name, because I feel that those are
+cumbersome and unwieldy.  Rebecca also wanted to have a Jewish last name,
+to honor her cultural heritage.  Finally, I was inclined to have a name
+that started with "G" so my (and her) initials would stay the same.</p>
+
+<p>Our first thought was that we would find a new name that met all of our
+criteria and both change to that name.  Unfortunately, there are only
+really two common Jewish surnames that start with "G": Gold and Green
+(plus all the variations thereof), and we couldn't find a variation on
+Green that we both liked.  We started looking at other Jewish surnames,
+and I realized that I really did want to keep my initials, if only because
+I have the username "phil_g" on a <em>lot</em> of sites, not least of which is
+the email address I've had for over a decade now.</p>
+
+<p>So I offered to just take Rebecca's name because that approach
+accomplished everything we wanted.  She was a little hesitant, feeling
+that doing so would require more of me than her, but we eventually agreed
+that it seemed the best approach given our requirements.</p>
+
+<p>Postscript: Some people suggested changing my middle name to my old last
+name, as some married women do.  I opted against that approach, because my
+middle name is the same as my dad's.  I would never want to give my child
+the same first name as myself, but I like the subtle continuity of shared
+middle names.</p>
+
+
+<h2>Fri, 11 Jul 2008</h2>
+
+<div class="story-title" id="lossless-dvd-to-mkv">
+  <h3>DVD Video to Matroska Video, Losslessly</h3>
+  <div class="title-links">
+    2:35PM |
+    <a href="../Geekery.htm" >Geekery</a> |
+    
+    <a href="../Geekery/lossless-dvd-to-mkv.htm" title="permalink for DVD Video to Matroska Video, Losslessly" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I recently had the desire to rip some DVDs so I could watch them on my
+computer without swapping discs.  I figured I could just pull everything
+from the DVD into <a href="http://www.matroska.org/">Matroska</a> files, since Matroska supports
+everything that DVDs do.  When I went looking on the Internet, I found few
+resources for moving from DVD to MKV, and everything that did talk about
+it actually reencoded the DVD video to get it into its final destination.
+Since Matroska can contain all of the codecs native to DVDs, I wanted to
+transfer everything losslessly.  This is how I did it.  (Note that I'm
+using the Linux command line; I prefer Linux to Windows, and the command
+line to X.)</p>
+
+<p>The programs I used are as follows:</p>
+
+<ul>
+<li><a href="https://launchpad.net/dvdbackup" title="Rip DVDs from the command line.">dvdbackup</a> (optional)</li>
+<li><a href="http://xinehq.de/" title="Free video player.">xine</a> (optional; only for cracking CSS)</li>
+<li><a href="http://lsdvd.sourceforge.net" title="Read and display DVD TOC.">lsdvd</a></li>
+<li><a href="http://www.transcoding.org/" title="Command line program suite for transcoding audio and video.">transcode</a>, mostly <code>tcextract</code></li>
+<li><a href="http://subtitleripper.sourceforge.net" title="DVD subtitle ripper.">subtitleripper</a>, for <code>subtitle2vobsub</code></li>
+<li><a href="http://www.bunkus.org/videotools/ogmtools/index.html" title="Tools for manipulating OGG media streams.">ogmtools</a>, for <code>dvdxchap</code></li>
+<li><a href="http://www.bunkus.org/videotools/mkvtoolnix" title="Tools for manipulating Matroska media streams.">mkvtoolnix</a>, for <code>mkvmerge</code></li>
+<li><a href="http://www.mplayerhq.hu/" title="Multipurpose media player">mplayer</a>, for most of the stream dumping</li>
+</ul>
+
+<h4>Some Background</h4>
+
+<p>I don't know all the details of how data is stored on DVDs, but here's a
+rough overview.  The video on DVDs is encoded in either <a href="http://en.wikipedia.org/wiki/MPEG-2" title="MPEG-2, Part 2">MPEG-2</a> or
+<a href="http://en.wikipedia.org/wiki/MPEG-1#Video" title="MPEG-1, Part 2">MPEG-1</a> with a variable bit rate.  The audio can be in raw
+<a href="http://www.digitalpreservation.gov/formats/fdd/fdd000016.shtml" title="Pulse code modulation">PCM</a>, <a href="http://en.wikipedia.org/wiki/DTS_Coherent_Acoustics" title="DTS Coherent Acoustics">DTS</a>, <a href="http://en.wikipedia.org/wiki/MPEG-1_Audio_Layer_II" title="MPEG-1 Audio Layer II">MP2</a>, or <a href="http://en.wikipedia.org/wiki/Dolby_Digital" title="Dolby Digital">AC3</a>.  Most DVDs use AC3.
+Not all DVD players support DTS.  Subtitles are stored as bitmaps with
+associated timecodes governing when to show them on screen.</p>
+
+<p>In a DVD, the basic unit of video is a <em>title</em>.  Each title consists of
+one or more video streams, zero or more audio streams, zero or more
+subtitle streams, and a list of timepoints to mark chapter boundaries.
+The titles on a DVD are grouped together into <em>titlesets</em>.  The grouping
+may be arbitrarily-chosen by the DVD manufacturer, but all titles in a
+given titleset must have the same video encoding parameters (codec,
+dimensions, framerate, etc.).  All of the data for each titleset is
+concatenated together into <a href="http://www.mpucoder.com/DVD/vobov.html" title="Video OBject">VOB</a> format and then split into 1GB
+chunks.  The net result is that there's no one-to-one correspondence
+between files on the DVD and individual titles.  Worse, titles are
+actually implemented as start and end indices into the VOB stream, so it's
+entirely possible for titles to overlap each other.  This often shows up
+in TV show DVDs with a "play all" option: all of the episodes are in a
+single titleset and the "play all" menu option goes to a title that spans
+the entire titleset, while individual episodes  are titles that only span
+the relevant part of the titleset.</p>
+
+<p>If a title has more than one video stream, one will be the primary stream
+while the others represent alternate angles.  Few DVDs have multiple
+angles, so I'm not sure how the data for those works; all of the DVDs I've
+seen just have a single video stream for each title.</p>
+
+<p>Also note that not all of the titles on a DVD are the feature content.
+Almost every bit of video, including DVD extras like bloopers and "making
+of" videos, is stored as a title.  The one exception is the DVD menus.
+Those are also stored on the DVD as VOBs, but they're indexed
+differently, so they don't show up as titles.  Be aware that DVD easter
+eggs, including some apparently-longer videos, are often implemented as
+menus, so they won't show up as titles.</p>
+
+<p>Any of a DVD's titles may be encrypted with <a href="http://www.dvdcca.org/css/" title="Content Scramble System">CSS</a>.  Either the DVD
+player or the DVD drive must have a licensed CSS decryption key in order
+to read the encrypted data.  Fortunately, CSS is somewhat weak, and most
+Linux programs for accessing DVDs use <a href="http://www.videolan.org/developers/libdvdcss.html" title="CSS handling library.">libdvdcss</a> to bypass the
+encryption.</p>
+
+<h4>Ripping the DVD</h4>
+
+<p>Ripping the DVD isn't strictly necessary, but it helps to have all of the
+data on your hard drive for processing.  Even if you don't copy the videos
+to your hard drive, you'll have to mount the DVD and use its IFO files;
+I'll get to that later.</p>
+
+<p>The easiest way to rip the DVD is with <code>dvdbackup</code>.  It creates a
+directory for the DVD and then puts a VIDEO_TS subdirectory in the DVD
+directory.  The VIDEO_TS directory contains all of the files in the DVD's
+VIDEO_TS directory.  (Or, at least, it will if you use the <code>-M</code> option;
+other options give more restricted results.)</p>
+
+<pre><code>dest_dir=&lt;destination directory&gt;
+dvd_name=&lt;DVD name&gt;
+dvd_device=&lt;DVD device, e.g. /dev/dvd&gt;
+dvdbackup -M -i &#036;dvd_device -o &#036;dest_dir -n &#036;dvd_name
+</code></pre>
+
+<p>In theory, you could also mount the DVD and just copy all of the files
+over, but that has not worked well for me in the past, partly because of
+CSS problems, but also partly because my drive is a little wonky.</p>
+
+<p>You can also just take an image of the DVD with dd.  You'll need to
+disable the CSS beforehand.  I've found that just running <code>xine</code> on the
+DVD is sufficient.</p>
+
+<pre><code>dest_dir=&lt;destination directory&gt;
+dvd_name=&lt;DVD name&gt;
+dvd_device=&lt;DVD device, e.g. /dev/dvd&gt;
+xine dvd://
+dd if=&#036;{dvd_device} bs=2048 conv=sync,noerror of=&#036;{dest_dir}/&#036;{dvd_name}.iso
+</code></pre>
+
+<p>If you have <a href="http://www.ivarch.com/programs/pv.shtml" title="Pipe Viewer">pv</a> installed, you can get a fancy progress bar.</p>
+
+<pre><code>dest_dir=&lt;destination directory&gt;
+dvd_name=&lt;DVD name&gt;
+dvd_device=&lt;DVD device, e.g. /dev/dvd&gt;
+xine dvd://
+dd if=&#036;{dvd_device} bs=2048 conv=sync,noerror |
+  pv -s &#036;(fdisk -l &#036;dvd_device |
+          perl -nle 'm{^Disk '&#036;{dvd_device}': \d+ MB, (\d+) bytes&#036;} and print &#036;1') \
+  &gt;&#036;{dest_dir}/&#036;{dvd_name}.iso
+</code></pre>
+
+<h4>Get Disc Info</h4>
+
+<p>Whether you've ripped the DVD to disk or not, you need to see what's on
+it.  Change into your working directory and run <code>lsdvd</code>.  (NB: From here
+on out, unless otherwise noted, all commands that reference a DVD will
+work equally well with a device (e.g. /dev/dvd), a disc image (like the
+one created with <code>dd</code>), or a directory containing a VIDEO_TS directory
+structure.)</p>
+
+<pre><code>dvd=&lt;DVD device, image, or directory&gt;
+lsdvd -a -n -c -s -v &#036;dvd &gt; contents
+</code></pre>
+
+<h4>Rip Each Title</h4>
+
+<p>The first order of business is to get the title data off of the DVD.
+<code>tccat</code> will pull just the given title's stream out of the DVD.  (Note
+that the resulting file has the possibility of exceeding 7GB in size; make
+sure your filesystem can handle files that large.)</p>
+
+<pre><code>title=&lt;title number, e.g. 01&gt;
+dvd=&lt;DVD device, image, or directory&gt;
+tccat -i &#036;dvd -t dvd -T &#036;{title},-1 &gt;&#036;{title}.vob
+</code></pre>
+
+<p>The information about the title's chapters isn't in the VOB, so you'll
+have to extract that separately with <code>dvdxchap</code>.  In my experience,
+<code>dvdxchap</code> never gets useful information for the chapter names (perhaps
+the DVD only contains the timepoints with no names associated), so you may
+want to edit the resulting file to put in more meaningful names.  (Note
+that <code>mplayer</code> will output chapter information if you use its <code>-identify</code>
+option, but <code>dvdxchap</code> is more precise in its timing and also generates
+the data in the format that <code>mkvmerge</code> wants.)</p>
+
+<pre><code>dvdxchap -t &#036;title &#036;dvd &gt; &#036;{title}.chapters
+</code></pre>
+
+<p>I've seen DVDs where the TOC info as reported by <code>lsdvd</code> doesn't match the
+actual streams in the titles, so it's good to check the track directly.
+Ideally, <code>tcprobe</code> would give all the information about the streams, but
+while it gives good information about audio and video streams, it doesn't
+give all the details we'll need about subtitle streams.  Thus, we need to
+use <code>mplayer</code>.  <code>mplayer</code> gives audio stream ids in decimal, not hex, so
+the first audio stream will show as 128, not 0x80.  It numbers the
+subtitle streams from zero, though, so you have to add 0x20 to the numbers
+it gives to get the actual subtitle stream ids.</p>
+
+<pre><code>mplayer -dvd-device &#036;dvd -vo null -ao null -frames 0 -v dvd://&#036;{title} 2&gt;&amp;1 | egrep '[as]id' &gt; &#036;{title}.streams
+</code></pre>
+
+<p>In an ideal world, <code>mkvmerge</code> would be able to operate directly on the
+VOB, but when I tried that, it had problems demuxing the data and it died
+halfway through.  So I'll use <code>tcextract</code> to pull out the individual
+components.  Video first.</p>
+
+<pre><code>tcextract -i &#036;{title}.vob -t vob -x mpeg2 &gt;&#036;{title}.video.m2v
+</code></pre>
+
+<p>Next up are the audio tracks.  The VOB may contain more than one audio
+track.  They should be labeled as to to their language, but check
+<code>mplayer</code>'s info, not <code>lsdvd</code>'s.  <code>mplayer</code>'s info will also tell what
+format the audio is in.  <code>tcextract</code> wants the audio tracks numbered from
+zero, but <code>mplayer</code> reports their actual track ids, which usually start at
+128 and go up from there.  The lowest-numbered track is track 0 to
+<code>tcextract</code>, and so on.</p>
+
+<pre><code>lang=&lt;language code&gt;
+track=&lt;source audio track: 0, 1, 2, etc.&gt;
+format=&lt;extension for audio format; e.g. ac3, mp2&gt;
+tcextract -i &#036;{title}.vob -t vob -x &#036;format -a &#036;track &gt;&#036;{title}.audio-&#036;{lang}.&#036;{format}
+</code></pre>
+
+<p>The VOB also contains subtitles, although most programs that query it
+won't see them.  Unlike when extracting audio, <code>tcextract</code> requires that
+you use the absolute track number, but <code>mplayer</code> reports a relative
+number.  You will need to add 0x20, or 32 to the value that <code>mplayer</code>
+reports for the subtitle tracks.  Some of the information for subtitles is
+stored in .IFO files on the DVD.  Each titleset has its own .IFO file;
+check the contents file to see what titleset contains the track and use
+that titleset's .IFO file.  It will be in the <code>VIDEO_TS</code> directory, named
+<code>VTS_&lt;titleset number&gt;_0.IFO</code>.</p>
+
+<p>Matroska supports several subtitle formats, but VobSub is probably the
+easiest to use, because it's a series of bitmaps, just like the DVD
+subtitles.  If you're not happy with VobSub, you'll need to OCR each image
+to get its text; there are instructions for doing so elsewhere on the
+Internet.</p>
+
+<pre><code>lang=&lt;language code&gt;
+stream_id=&lt;id of the subtitle stream: 0x20, 0x21, 32, 33, etc.&gt;
+ifo=&lt;IFO file; e.g. /path/to/VIDEO_TS/VTS_nn_0.IFO&gt;
+tcextract -i &#036;{title}.vob -t vob -x ps1 -a &#036;stream_id &gt;&#036;{title}.subs-&#036;{lang}.raw
+subtitle2vobsub -p &#036;{title}.subs-&#036;{lang}.raw -i &#036;ifo -o &#036;{title}.subs-&#036;{lang}
+</code></pre>
+
+<p>Finally, it's time to bring everything together with <code>mkvmerge</code>.  When I
+use <code>&lt;title&gt;</code>, I mean the actual textual title for the video, like "Bob's
+House of Horror 2" or whatever.  <code>&#036;{title}</code> still refers to the title
+number on the DVD.</p>
+
+<pre><code>mkvmerge -o &lt;final filename&gt; \
+         --title &lt;title&gt; \
+         --chapters &#036;{title}.chapters \
+         &#036;{title}.video.m2v \
+         &lt;audio clauses&gt; \
+         &lt;subtitle clauses&gt;
+</code></pre>
+
+<p>For each audio file, you'll need a clause giving the file and its
+language.  The first file you list on the command line will be the default
+audio, unless you use <code>mkvmerge</code>'s <code>--default-track</code> option to change it.</p>
+
+<pre><code>--language 0:&#036;{lang} &#036;{title}.audio-&#036;{lang}.ac3
+</code></pre>
+
+<p>Likewise, you'll need a clause for each subtitle file.  Since I generally
+don't want any subtitles displayed by default, I set things so that there
+isn't a default subtitle track.</p>
+
+<pre><code>--language 0:&#036;{lang} --default-track 0:0 &#036;{title}.subs-&#036;{lang}.idx
+</code></pre>
+
+<p>And that should do it.  After a fair bit of disk-churning, you should have
+a Matroska file containing all of the elements from the original DVD
+title.  You can now delete all of your intermediate files and just keep
+the MKV on your computer and the DVD in its box.</p>
+
+
+<h2>Thu, 29 May 2008</h2>
+
+<div class="story-title" id="bluetooth-proximity">
+  <h3>Auto-locking My Computer When I Walk Away</h3>
+  <div class="title-links">
+    2:13PM |
+    <a href="../Geekery.htm" >Geekery</a> |
+    
+    <a href="../Geekery/bluetooth-proximity.htm" title="permalink for Auto-locking My Computer When I Walk Away" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>The other day, while I was wating for several GB to transfer over the
+network at work, I finally got around to setting something that's been
+dancing at the back of my mind for a while: computer-based proximity
+detection using Bluetooth.</p>
+
+<p>I have a <a href="http://www.palm.com/us/products/smartphones/treo650/" title="Palm Treo 650 Smartphone">Treo 650</a>.  It has Bluetooth.  I also have a <a href="http://www.targus.com/us/product_Details.asp?SKU=ACB10US" title="Targus USB Bluetooth® Adapter - ACB10US">USB
+Bluetooth Adapter</a>.  I originally planned to carry the
+bluetooth adapter around and hook it up to different computers whenever I
+wanted to talk to the Treo, but I've only been using it at work, so I've
+been leaving the adapter connected to my Linux computer at work.  The
+thought occurred to me that I could use the Bluetooth adapter to see
+whether my phone was nearby and do things based on that information.  At
+least to start, I decided to have the computer lock itself when I wasn't
+around.</p>
+
+<p>I have the <a href="http://www.bluez.org/" title="Official Linux Bluetooth protocol stack">BlueZ</a> Bluetooth stack installed.  (On Debian, that's
+the <code>bluez-utils</code> package.)  They include a <code>l2ping</code> program, but that
+establishes a full Bluetooth connection with the device, which makes my
+Treo turn on the screen, play a little sound, and show a pop-up dialog.
+That's a little intrusive for something that I want checked several times
+a minute.  Some people use <code>hcitool rssi</code> to find out the strength of the
+phone's (or other device's) Bluetooth signal.  That also requires a full
+Bluetooth connection.  I ended up using <code>hcitool name</code>, which returns the
+name of the device if it's found and nothing if it's not.  More
+importantly, it doesn't cause the Treo to do anything but silently send
+its response, and it works even if the Treo screen is off.</p>
+
+<p>So I now have a stupid little shell script that looks like this:</p>
+
+<pre><code>#!/bin/sh
+
+PHONE_ADDR=01:23:45:67:89:AB
+PHONE_NAME="glamdring"
+WAIT_TIME=15
+
+while true; do
+  if [ "&#036;(hcitool name &#036;PHONE_ADDR)" \!= "&#036;PHONE_NAME" ]; then
+    xscreensaver-command -lock
+  fi
+  sleep &#036;WAIT_TIME
+done
+</code></pre>
+
+<p>There are programs for Windows that do similar things.  Possibly one of
+the simplest is <a href="http://members.lycos.co.uk/wuul/bluelock/readme.html">Blue Lock</a>, which is also open-source (and
+written in Delphi).  I'm probably just going to write a simple Windows
+program to listen on the network for a message from my Linux computer to
+tell it to lock the screen.</p>
+
+
+<h2>Fri, 02 May 2008</h2>
+
+<div class="story-title" id="nfsn-hosted">
+  <h3>New Site Hosting</h3>
+  <div class="title-links">
+    2:49PM |
+    <a href="../General.htm" >General</a> |
+    
+    <a href="../General/nfsn-hosted.htm" title="permalink for New Site Hosting" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>In the interests of better site availability and less Comcast
+AUP-breaking, I've finally gotten around to outsourcing my website
+hosting.  I'm currently at <a href="https://www.nearlyfreespeech.net/">NearlyFreeSpeech.net</a>, a webhost
+committed to the twin goals of free speech and affordable web hosting.</p>
+
+<p>How free is their speech?  Read their <a href="https://www.nearlyfreespeech.net/help/abuse">Abuse page</a>:</p>
+
+<blockquote>
+  <p>"A NearlyFreeSpeech.NET member site is defaming me or otherwise injuring
+   me civilly."</p>
+  
+  <p>Please forward a copy of your legal finding from a court of competent
+  jurisdiction to our contact address. If you have not yet obtained such a
+  finding, a preliminary injunction or court order is also sufficient.</p>
+  
+  <p>If you are not able to obtain the above, you will need to work directly
+  with the site operator to resolve your differences. We will have to fall
+  back on our members' contractual assertion that the content they upload
+  is legitimate and therefore we will not be able to get involved</p>
+</blockquote>
+
+<p>How affordable is their <a href="https://www.nearlyfreespeech.net/services/hosting.php">hosting</a>?  You pay only for the
+bandwidth and storage that you actually use: $1 per gigabyte of bandwidth
+and $0.01 per megabyte-month of storage.  (Plus the bandwidth cost goes
+down the more you use.)</p>
+
+<p>They support a variety of CGI scripting languages,
+<a href="http://example.nfshost.com/versions.php">including</a> C, PHP, Perl, Python, and Ruby.  Oh, but also
+Fortran, Tcl, <em>Lisp</em>, <em>Scheme</em>, <em>OCaml</em>, and <strong>Haskell</strong>.</p>
+
+<p>We'll see how it goes, but I think I'll like it here.</p>
+
+
+<h2>Tue, 19 Feb 2008</h2>
+
+<div class="story-title" id="java-reflection-noodling">
+  <h3>Java Reflection</h3>
+  <div class="title-links">
+    5:31PM |
+    <a href="../Geekery.htm" >Geekery</a> |
+    
+    <a href="../Geekery/java-reflection-noodling.htm" title="permalink for Java Reflection" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I'm only a few weeks into <a href="http://www.umuc.edu/programs/undergrad/courses/cmiscat.shtml#cmis141">my Java class</a> and I'm already annoyed
+at the language.  I'm completely willing to ascribe this to newbieness,
+where I'm just not working with what the language gives me, but the
+metaobject stuff in Java seems a bit painful.</p>
+
+<p>I'm working on a project for the class where I have to accept input in
+several different units of heat (BTUs, calories, and joules) and output
+the measurement in joules.  I've made an abstract base class for the
+various units and created concrete classes for each unit the program has
+to read.  I'd like to just have a list of available classes and have my
+program enumerate them automatically (rather than hardcoding the behavior
+for each), but the way I would normally think about doing this is painful
+in Java.</p>
+
+<p>In Delphi, I'd do something like this:</p>
+
+<pre><code>type
+  THeatUnits = class
+   public
+    constructor Create(Value : Real); virtual;
+    class function GetUnitsName : String; virtual; abstract;
+    function ConvertToJoules : Real; virtual; abstract;
+  end;
+
+  THeatUnitsClass = class of THeatUnits;
+
+  TBTUs = class(THeatUnits);
+  TCalories = class(THeatUnits);
+  TJoules = class(THeatUnits);
+
+const
+  availableUnits : array [1..3] of THeatUnitsClass
+                 = (TBTUs, TCalories, TJoules);
+
+...
+
+procedure DoStuff(Index : Integer; Value : Real);
+  var
+    Units : THeatUnits;
+begin
+  Units := availableUnits[Index].Create(Value);
+  // Now do things polymorphically with Units.
+end;
+</code></pre>
+
+<p>Delphi's class types often seem like a quick hack to me, but they beat
+what Java does in the same situation.  For one thing, there doesn't seem
+to really be a class type in the same way that Delphi does it.  There are
+instead objects of type <code>Class</code>.  As far as I can tell, the best way to get
+one of those is to call <code>Class.forName("ClassName")</code>.  But the painful
+part is that there's no specialization of class types at compile time, so
+the Java code equivalent to my <code>Units := availableUnits[Index].Create(Value);</code>
+above would be something like this:</p>
+
+<pre><code>static final AVAILABLE_UNITS = new String[] ("BTUs", "Calories", "Joules");
+
+public void doStuff(int index, double value) {
+  Class unitClass = Class.forName(AVAILABLE_UNITS[index]);
+  Constructor unitConstructor = unitClass.getConstructor(new Class[] (double.class));
+  HeatUnits units = (HeatUnits)unitConstructor.newInstance(new Object[] (new Double(value)));
+  // now do things polymorphically with units.
+}
+</code></pre>
+
+<p>(Common Lisp, of course, would be more succinct than Delphi, because
+everything is first-class; I would probably do something like this:</p>
+
+<pre><code>(defclass heat-units () ())
+
+(defgeneric get-units-name (unit-class))
+(defgeneric convert-to-joules (unit-class))
+
+(defclass btus (heat-units) ())
+(defclass calories (heat-units) ())
+(defclass joules (heat-units) ())
+
+(defparameter +available-units+ #(btus calories joules))
+
+(defun do-stuff (index value)
+  (let ((units (make-instance (svref +available-units+ index)
+                              :value value)))
+    ;; Now do things polymorphically with units.
+    ))
+</code></pre>
+
+<p>)</p>
+
+<p>As I said, though, I think this is just an artifact of not thinking in
+Java to the appropriate degree.  Most of Java's reflection stuff seems set
+up to be useful at run-time while Delphi's run-time reflection is much
+uglier than Java's.  And I think I'm going to approach my Java problem
+from a different direction, with an enum and a factory method.  I was
+still struck by how annoyingly wordy (and not entirely typesafe) my first
+approach turned out to be in Java.</p>
+
+
+</div>
+
+<div id="sidebar">
+  <h2>Static</h2>
+  <ul>
+    <li><a href="../../prompt/index.htm">zsh prompt</a></li>
+    <li><a href="../../pgp/index.htm">PGP</a></li>
+    <li><a href="../../ssh/index.htm">SSH</a></li>
+    <li><a href="../../MTA/index.htm">MTA</a></li>
+    <li><a href="../../tutorials/index.htm">tutorials</a></li>
+    <li><a href="../../configs/index.htm">config files</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/sets/1671829/">desktop</a></li>
+    <li><a href="http://www.librarything.com/catalog/asciiphil">books I own</a></li>
+    <li><a href="../../stuff/index.htm">stuff I'm giving away</a></li>
+    <li><a href="../../drwho/index.htm">Dr. Who eps I have</a></li>
+    <li><a href="http://del.icio.us/phil_g">bookmarks</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/">photos</a></li>
+    <li><a href="../../about.htm">about</a></li>
+  </ul>
+
+  <h2>Directory</h2>
+  <ul class="categories">
+<li class="this-category">Root (134)
+<ul>
+<li><a href="../Books/index.htm">Books</a> (31)
+</li>
+<li><a href="../Events/index.htm">Events</a> (7)
+<ul>
+<li><a href="../Events/Burning_Man/index.htm">Burning Man</a> (3)
+</li>
+<li><a href="../Events/Camping/index.htm">Camping</a> (2)
+</li>
+<li><a href="../Events/PDF/index.htm">PDF</a> (2)
+</li>
+</ul>
+</li>
+<li><a href="../Geekery/index.htm">Geekery</a> (30)
+<ul>
+<li><a href="../Geekery/Test/index.htm">Test</a> (3)
+</li>
+</ul>
+</li>
+<li><a href="../General/index.htm">General</a> (22)
+</li>
+<li><a href="../Links/index.htm">Links</a> (12)
+<ul>
+<li><a href="../Links/Slashdot/index.htm">Slashdot</a> (1)
+</li>
+</ul>
+</li>
+<li><a href="../MTA/index.htm">MTA</a> (22)
+</li>
+<li><a href="../Recipes/index.htm">Recipes</a> (4)
+</li>
+<li><a href="../Video_Games/index.htm">Video Games</a> (6)
+<ul>
+<li><a href="../Video_Games/FFXI/index.htm">FFXI</a> (1)
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h2>Archive</h2>
+  <table class="month-calendar"><caption class="month-calendar-head"><a title="November 2008 (3)" href="11/index.htm">&larr;</a><a title="December 2008 (1)" href="12/index.htm">December</a><a title="January 2009 (1)" href="../2009/01/index.htm">&rarr;</a></caption>
+    <tr>
+      <th class="month-calendar-day-head Sunday">Sun</th>
+      <th class="month-calendar-day-head Monday">Mon</th>
+      <th class="month-calendar-day-head Tuesday">Tue</th>
+      <th class="month-calendar-day-head Wednesday">Wed</th>
+      <th class="month-calendar-day-head Thursday">Thu</th>
+      <th class="month-calendar-day-head Friday">Fri</th>
+      <th class="month-calendar-day-head Saturday">Sat</th>
+    </tr>
+    <tr>
+      <td class="month-calendar-day-noday Sunday">&nbsp;</td>
+<td class="month-calendar-day-nolink Monday">1</td>
+<td class="month-calendar-day-nolink Tuesday">2</td>
+<td class="month-calendar-day-nolink Wednesday">3</td>
+<td class="month-calendar-day-nolink Thursday">4</td>
+<td class="month-calendar-day-nolink Friday">5</td>
+<td class="month-calendar-day-nolink Saturday">6</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">7</td>
+<td class="month-calendar-day-nolink Monday">8</td>
+<td class="month-calendar-day-nolink Tuesday">9</td>
+<td class="month-calendar-day-nolink Wednesday">10</td>
+<td class="month-calendar-day-nolink Thursday">11</td>
+<td class="month-calendar-day-nolink Friday">12</td>
+<td class="month-calendar-day-nolink Saturday">13</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">14</td>
+<td class="month-calendar-day-nolink Monday">15</td>
+<td class="month-calendar-day-nolink Tuesday">16</td>
+<td class="month-calendar-day-nolink Wednesday">17</td>
+<td class="month-calendar-day-nolink Thursday">18</td>
+<td class="month-calendar-day-nolink Friday">19</td>
+<td class="month-calendar-day-nolink Saturday">20</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">21</td>
+<td class="month-calendar-day-link Monday"><a title="Monday, 22 December 2008 (1)" href="12/22/index.htm">22</a></td>
+<td class="month-calendar-day-nolink Tuesday">23</td>
+<td class="month-calendar-day-nolink Wednesday">24</td>
+<td class="month-calendar-day-nolink Thursday">25</td>
+<td class="month-calendar-day-nolink Friday">26</td>
+<td class="month-calendar-day-nolink Saturday">27</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">28</td>
+<td class="month-calendar-day-nolink Monday">29</td>
+<td class="month-calendar-day-nolink Tuesday">30</td>
+<td class="month-calendar-day-nolink Wednesday">31</td>
+      <td class="month-calendar-day-noday Thursday">&nbsp;</td>
+      <td class="month-calendar-day-noday Friday">&nbsp;</td>
+      <td class="month-calendar-day-noday Saturday">&nbsp;</td>
+</tr>
+</table>
+
+  <table class="year-calendar"><caption class="year-calendar-head"><a title="2007 (7)" href="../2007/index.htm">&larr;</a><a title="2008 (9)" href="index.htm">2008</a><a title="2009 (3)" href="../2009/index.htm">&rarr;</a></caption><tr><th class="year-calendar-subhead" colspan="6">Months</th></tr>
+<tr>
+<td class="year-calendar-month-nolink">Jan</td>
+<td class="year-calendar-month-link"><a title="February 2008 (1)" href="02/index.htm">Feb</a></td>
+<td class="year-calendar-month-nolink">Mar</td>
+<td class="year-calendar-month-nolink">Apr</td>
+<td class="year-calendar-month-link"><a title="May 2008 (2)" href="05/index.htm">May</a></td>
+<td class="year-calendar-month-nolink">Jun</td>
+</tr>
+<tr>
+<td class="year-calendar-month-link"><a title="July 2008 (1)" href="07/index.htm">Jul</a></td>
+<td class="year-calendar-month-nolink">Aug</td>
+<td class="year-calendar-month-nolink">Sep</td>
+<td class="year-calendar-month-link"><a title="October 2008 (1)" href="10/index.htm">Oct</a></td>
+<td class="year-calendar-month-link"><a title="November 2008 (3)" href="11/index.htm">Nov</a></td>
+<td class="year-calendar-this-month"><a title="December 2008 (1)" href="12/index.htm">Dec</a></td></tr>
+</table>
+
+
+  <h2>Search</h2>
+  <form method="GET" action="http://www.google.com/custom">
+    <p style="text-align: center">
+      <input type="hidden" name="domains" value="aperiodic.net">
+      <input type="hidden" name="cof" VALUE="GALT:#66CC6;S:http://aperiodic.net/phil/;GL:2;VLC:#CC66CC;AH:center;BGC:#000000;LC:#6666CC;GFNT:#666666;ALC:#CC6666;T:#CCCCCC;GIMP:#FFFFFF;AWFID:d3f1afbc39619250;">
+      <input type="hidden" name="sitesearch" value="aperiodic.net">
+      <input name="q" type="text" size="25" maxlength="255" style="width: 10em"><br>
+      Powered by <a href="http://www.google.com/"><span class="google-G1">G</span><span class="google-o1">o</span><span class="google-o2">o</span><span class="google-g2">g</span><span class="google-l">l</span><span class="google-e">e</span></a>
+    </p>
+  </form>
+
+
+  <h2>Currently Reading</h2>
+
+  <div id="wb55a1f3ca64835526140c06560a0205e"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wb55a1f3ca64835526140c06560a0205e">
+  </script>
+
+  <h2>Recent Books</h2>
+
+  <div id="wa13cfbb5a4be4d629ebe322b83f1e2f6"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wa13cfbb5a4be4d629ebe322b83f1e2f6">
+  </script>
+
+</div>
+
+<div class="hr"><hr></div>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../../index.htm">Back to main page.</a><br>
+</p>
+<ul class="validation">
+  <li>
+  <a href="http://validator.w3.org/check/referer">
+  <img src="http://aperiodic.net/phil/pics/html401.png" alt="Valid HTML 4.01">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://jigsaw.w3.org/css-validator/check/referer">
+  <img src="http://aperiodic.net/phil/pics/validcss.png" alt="Valid CSS 2">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://aperiodic.net/phil/archives/index.rss">
+  <img src="../../pics/rss10.png" alt="RSS syndication">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://feedvalidator.org/check?url=http://aperiodic.net/phil/archives/index.rss">
+  <img src="http://aperiodic.net/phil/pics/validrss.png" alt="Valid RSS 1.0">
+  </a>
+  </li>
+
+</ul>
+
+</html>

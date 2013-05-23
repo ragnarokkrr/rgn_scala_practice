@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<html>
+<head>
+<title>Intro to Linux Tutorial</title>
+<link rel="stylesheet" type="text/css" href="../default.css">
+</head>
+<body>
+<p>This is a translation from text into HTML of an old tutorial I
+gave.  The translation is incomplete.  Sorry.  I'll finish it
+eventually.</p>
+
+<ul>
+  <li> Intro to the Intro
+
+  <ul>
+    <li> What this tutorial is
+
+    <ul>
+      <li>Introduction to Linux/Unix
+
+      <ul>
+	<li> I will focus on Linux, but most stuff is applicable to other
+	Unices, too.
+      </ul>
+
+      <li> Enough to get you comfortable with the system and able to learn
+      more on your own.
+    </ul>
+
+    <li> What this tutorial is not
+
+    <ul>
+      <li> How to install Linux -- do that at Installfest
+      <li> How to use &lt;large program&gt; -- teaching basics
+      <li> Intro to graphical tools -- Unix's heart is text
+    </ul>
+
+    <li> Logging in
+
+    <ul>
+      <li> Linux is multi-user
+
+      <ul>
+	<li> Knows the "identity" of different users.
+	<li> Each user has a name -- who they are -- and password -- proof
+	that they are who they claim to be.
+	<li> Keeps user's stuff separate from the others
+      </ul>
+
+      <li> Type user name and password at prompt
+      <li> Rejoice!  (Or retype...)
+      <li> Non-local systems
+
+      <ul>
+	<li> Can log in to machines across the network.
+	<li> Briefly mention X's network transparency, too
+	<li> Use program for sending text across the network
+
+	<ul>
+	  <li> telnet
+
+	  <ul>
+	    <li> widely supported (windows has telnet program)
+	    <li> insecure -- plaintext
+	  </ul>
+
+	  <li> ssh
+
+	  <ul>
+	    <li> Better; secure
+	    <li> <a href="http://media.umbc.edu/ssh">http://media.umbc.edu/ssh</a>
+	  </ul>
+	  
+	</ul>
+	
+      </ul>
+      
+    </ul>
+    
+    <ul>
+      <li> Basic commands
+
+      <ul>
+	<li> Concepts
+
+	<ul>
+	  <li> type command on command line, press enter
+	  <li> "pieces" are separated by spaces
+	  <li> first piece is command name -- there is a program with that
+	  name somewhere on the system
+	  <li> last are arguments necessary to functioning of command --
+	  often files
+
+	  <ul>
+	    <li> Ex: rm <b>&lt;file&gt;</b>
+	    <li> Ex: ssh <b>&lt;computer&gt;</b>
+	  </ul>
+
+	  <li> In the middle are options, usually starting with dash
+
+	  <ul>
+	    <li> Ex: rm <b>-f</b> &lt;file&gt;
+	    <li> Ex: ssh <b>-v</b> &lt;computer&gt;
+	  </ul>
+	  
+	</ul>
+	
+      </ul>
+      
+      <ul>
+	<li> Useful commands
+
+	<dl>
+	  <dt>ls
+	  <dd>lists all files in a directory.
+	    <ul>
+	      <li>ls -l gives the long version of the directory
+	      listing, showing permissions, access times, and other useful
+	      info.
+	      <li>In UNIX, all files beginning with a dot are
+	      considered "hidden"; ls -a will display all files in the
+	      directory, including these.
+	      <li>ls -R will give you a recursive listing of the
+	      directory.
+	      <li>These options (and others!) can be combined like so: ls
+	      -alR. This is true of most UNIX commands.
+	    </ul>
+	  <dt>mv
+	  <dd>moves one file to another. The syntax is mv oldfile newfile.
+	    Since UNIX doesn't have a "rename" command, this is what you
+	    use.  It can also move directories.
+	  <dt>cp
+	  <dd>copies a file.  The syntax is cp oldfile newfile.
+	  <dt>pwd
+	  <dd>Displays the present working directory, e.g., "Where am I"?
+	  <dt>cd
+	  <dd>Changes directories. The syntax is cd newdirectory.
+	  <dt>mkdir
+	  <dd>Makes a new directory. The syntax is mkdir newdirectory.
+	  <dt>rm
+	  <dd>Deletes a file; the syntax is rm filename. To do a recursive
+	    removal (for a directory), type rm -r filename.
+	  <dt>man
+	  <dd>Brings up the manual page for the specified command. The
+	    syntax is man command . If you don't know the exact command,
+	    you can look for it by typing man -k something, where
+	    something is the object of your desires. Naturally, you can
+	    also type man man for help on man.
+	  <dt>chmod
+	  <dd>Changes the mode, or permissions, of a file or
+	    directory. Modes are covered in more detail below. Like cp,
+	    giving it an option of -R will make the change recursive. The
+	    syntax is chmod value filename.
+	  <dt>less
+	  <dd>Allows you to view a file without editing (and possibly
+	    writing to) it. The syntax is less filename. In typical UNIX
+	    fashion, less is better than it's predecessor, more.
+	  <dt>grep
+	  <dd>Searches a file for a string. The syntax is grep
+	    searchstring filename. grep also has other uses, one of which
+	    is given below.
+	  <dt>tar and gzip
+	  <dd>For compressed archives, similar to Window's .zip or MacOS's
+	    binhex. The extensions for tarred and gzipped archives are
+	    .tar and .gz, respectively. Most often, you will see both at
+	    once, eg foo.tar.gz, or the abbreviation foo.tgz. To
+	    decompress these archives, you can type tar xvzf filename
+	    (this applies to the GNU/Linux version of tar). tar has
+	    literally dozens of options, and the man page is not for the
+	    faint of heart.
+	  <dt>ssh
+	  <dd>This is the UNIX command to evoke Secure Shell, which is a
+	    safe, secure replacement for telnet. The basic syntax is ssh
+	    user@hostname. An example would be ssh r1@linux.umbc.edu.
+	</dl>
+
+      </ul>
+
+    </ul>
+
+  </ul>
+
+</ul>
+
+<hr>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="index.htm">Back to tutorials.</a><br>
+<a href="../index.htm">Back to main page.</a><br>
+</p>
+</body>
+</html>

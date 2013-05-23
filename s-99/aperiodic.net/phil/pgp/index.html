@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>PGP Info Index</title>
+<link rel="stylesheet" type="text/css" href="../default(1).css">
+</head>
+
+<body>
+<h1>PGP Info Index</h1>
+
+<p>This section of my website is devoted to PGP.  I am a large fan of
+privacy, as well as being a bit paranoid, so I like the idea of PGP and
+its public key infrastructure.</p>
+
+<p>Not surprisingly, I have a PGP public key.  It's key ID
+<tt>026A27F2</tt> with fingerprint <tt>D200 5BDB FC4B B24A 9248 &nbsp;9F7A
+4322 2D22 026A 27F2</tt>.  It's available from all of the OpenPGP
+keyservers I know of, but you can also <a href="http://aperiodic.net/phil/pgp/gpgkey.txt">grab it
+here</a>, if you like.  (Use of my previous key, id <tt>D8C75CF5</tt>, is
+now deprecated.)</p>
+
+<p>I've written a <a href="tutorial.html">tutorial</a> that covers the
+basics of using GPG (the <a href="http://www.gnupg.org/">GNU Privacy
+Guard</a>) to create, sign, and use a PGP key.  I'm not sure why, but I've
+kept around the <a href="http://aperiodic.net/phil/pgp/irc.log">IRC log</a> (also <a
+href="irc.log.html">HTMLified</a>) that led to the tutorial in the first
+place.</p>
+
+<p>A friend of mine (<a href="http://www.pobox.com/~mgurski00001/">Mike
+Gurski</a>) wrote a simple script to send and receive keys to and from
+all of the keyservers at once.  I made a few changes and the result is <a
+href="recv-keys.html"><code>recv-keys</code></a>.</p>
+
+<p>I've put up a page with my <a href="policy.html">keysigning policy</a>, 
+so people can see what criteria I use for signatures.</p>
+
+<p>Finally, I have a set of tools I use to maintain a graph of my web of
+trust.  <tt><a href="gpgtree_funcs">gpgtree_funcs</a></tt> is a set of
+shell functions to run everything.  (They work in zsh and should also
+work in any Bourne-shell-compatible shell.)  Basically, they work by
+maintaining a separate keyring solely for the web of trust.  In order for
+them to work, you'll need gpg, perl, the previously-mentioned recv-keys
+script, <a href="http://www.chaosreigns.com/code/sig2dot/">sig2dot.pl</a>,
+and dot and neato from
+<a href="http://www.research.att.com/sw/tools/graphviz/">graphviz</a>.
+Note that, worldwide, there is one "strong set" of keys that all have
+connected signature paths.  This set is (at last count) roughly 10000 keys
+in size.  If your key is a member of this set, these scripts will not work
+for you.  As they have ceased working for me.  I'm trying to figure out a
+better approach.</p>
+
+<hr>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../index.html">Back to main page.</a><br>
+</p>
+</body> </html>

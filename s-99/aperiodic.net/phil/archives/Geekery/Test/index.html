@@ -1,0 +1,402 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scape=1.0; user-scalable=false;">
+  <link rel="apple-touch-icon" href="/phil/avatar-iphone.png">
+  <title>Geekery : Test :: Phil! Gold</title>
+
+  <meta name="DC.title" content="Phil! Gold">
+
+  <link rel="openid.server" href="http://www.livejournal.com/openid/server.bml">
+  <link rel="openid.delegate" href="http://phil-g.livejournal.com/">
+
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://aperiodic.net/phil/archives/index.rss">
+  <link rel="stylesheet" type="text/css" href="../../../default(1).css">
+  <link rel="stylesheet" type="text/css" href="../../../blog(1).css">
+
+</head>
+
+<body>
+
+<div id="header">
+  <h1>Phil! Gold :: Geekery : Test</h1>
+</div>
+
+<div id="content">
+<h2>Tue, 13 Dec 2005</h2>
+
+<div class="story-title" id="typography-test">
+  <h3>Typography Testing</h3>
+  <div class="title-links">
+    2:11PM |
+    <a href="../../Geekery(1)" >Geekery</a>/<a href="../Test(1)" >Test</a> |
+    
+    <a href="typography-test.html" title="permalink for Typography Testing" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>Just some experiments with various typography.</p>
+
+<p>I happen to be one of those people that prefers to have more space between
+sentences than between words.  Ideally, this should be about a space and a
+half; that's what most typography does and I think it looks good.  When
+typing in ASCII, I put two spaces between sentences, because that's the
+closest approximation that looks good.  Unfortunately, HTML collapses
+whitespace so you get things like:</p>
+
+<blockquote>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Fusce tincidunt orci vitae dolor.  Nam tristique velit ac turpis tincidunt
+tincidunt.  Morbi feugiat lacinia ante.  Pellentesque habitant morbi
+tristique senectus et netus et malesuada fames ac turpis egestas.  Nulla
+facilisi.  Fusce orci mi, tincidunt ut, aliquam vel, sodales ac, odio.  In
+pellentesque purus.  Aliquam enim augue, convallis dictum, condimentum ut,
+commodo a, augue.  Fusce viverra justo ut risus.  Curabitur tellus arcu,
+malesuada sit amet, dictum vel, iaculis nec, nisl.</blockquote>
+
+<p>Now, if we replace the double spaces with en spaces, we get:</p>
+
+<blockquote>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. 
+Fusce tincidunt orci vitae dolor. Nam tristique velit ac turpis tincidunt
+tincidunt. Morbi feugiat lacinia ante. Pellentesque habitant morbi
+tristique senectus et netus et malesuada fames ac turpis egestas. Nulla
+facilisi. Fusce orci mi, tincidunt ut, aliquam vel, sodales ac, odio. In
+pellentesque purus. Aliquam enim augue, convallis dictum, condimentum ut,
+commodo a, augue. Fusce viverra justo ut risus. Curabitur tellus arcu,
+malesuada sit amet, dictum vel, iaculis nec, nisl.</blockquote>
+
+<p>Not <em>too</em> bad.  There's some extra spacing in there.  The
+"elit. Fusce" sequence actually has an en space followed by a normal
+space, because I have a newline in my source at that point, and HTML
+doesn't consider the en space to be whitespace.  This seems to work best
+with Firefox 1.0 on Linux.  In Firefox 1.5 on Windows, for some reason,
+the paragraph with the en spaces has extra vertical space between lines.
+And Internet Explorer 5 for Windows doesn't display the en spaces; it puts
+empty squares in their place.</p>
+
+<p>I also wouldn't mind using nice-looking quote marks for things.  HTML has
+a tag for inline quoting: the &lt;q&gt; tag.  Most browsers don't quite
+work properly with it.  Here's a nice bit of quoted text:</p>
+
+<blockquote>“And then he said, ‘Stop, or, as my father used to say, “cut
+it out!”’”</blockquote>
+
+<p>When rendered with &lt;q&gt; tags, it looks like this:</p>
+
+<blockquote><q>And then he said, <q>Stop, or, as my father used to say,
+<q>cut it out!</q></q></q></blockquote>
+
+<p>Nobody gets it exactly right.  Firefox 1.0 uses ASCII double quotes for
+everything.  Firefox 1.5 correctly uses double curly and then single curly
+quotes, but it also uses single curly quotes on the innermost quote.  w3m
+uses the ASCII backtick for all leading quotes and the ASCII single quote
+for all trailing quotes.  Internet Explorer 5 doesn't render anything.</p>
+
+
+<h2>Sun, 20 Mar 2005</h2>
+
+<div class="story-title" id="Iñtërnâtiônàlizætiøn">
+  <h3>Iñtërnâtiônàlizætiøn</h3>
+  <div class="title-links">
+    10:35PM |
+    <a href="../../Geekery(1)" >Geekery</a>/<a href="../Test(1)" >Test</a> |
+    
+    <a href="I�t�rn�ti�n�liz�ti�n.html" title="permalink for Iñtërnâtiônàlizætiøn" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>As suggested in <a href="http://www.intertwingly.net/blog/2005/03/16/AJAX-Considered-Harmful">AJAX Considered Harmful</a>, I'm testing out blosxom's URL-encoding.  In practice, the problems he raises aren't much of a concern for me, since blosxom gets its URLs from the filenames, and I stick to ASCII for entries in my filesystem.</p>
+
+<p>An interesting side note is that one of the pages he links to recommends not using extensions like ".html" for URLs, since they indicate formatting/delivery, not content.  Despite the presence of ".html" in my URLs, I'm actually fairly compliant with this, because blosxom treates that extension as a content request.  Still, it'd be better for the browser and server to do content negotiation.</p>
+
+
+<h2>Mon, 07 Mar 2005</h2>
+
+<div class="story-title" id="utf-8-test">
+  <h3>UTF-8 Test</h3>
+  <div class="title-links">
+    11:39AM |
+    <a href="../../Geekery(1)" >Geekery</a>/<a href="../Test(1)" >Test</a> |
+    
+    <a href="utf-8-test.html" title="permalink for UTF-8 Test" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>For aggregators (and we'll put some in the first sentence for summary-only
+ones: UTF-8(äéîøùñÞÐ∰ち)
+XML(&#228;&#233;&#238;&#248;&#249;&#241;&#222;&#208;&#8752;&#12385;)).</p>
+
+<pre>
+          .0 .1 .2 .3 .4 .5 .6 .7 .8 .9 .A .B .C .D .E .F
+     160.  ᘀ  ᘁ  ᘂ  ᘃ  ᘄ  ᘅ  ᘆ  ᘇ  ᘈ  ᘉ  ᘊ  ᘋ  ᘌ  ᘍ  ᘎ  ᘏ 
+     161.  ᘐ  ᘑ  ᘒ  ᘓ  ᘔ  ᘕ  ᘖ  ᘗ  ᘘ  ᘙ  ᘚ  ᘛ  ᘜ  ᘝ  ᘞ  ᘟ 
+     162.  ᘠ  ᘡ  ᘢ  ᘣ  ᘤ  ᘥ  ᘦ  ᘧ  ᘨ  ᘩ  ᘪ  ᘫ  ᘬ  ᘭ  ᘮ  ᘯ 
+     163.  ᘰ  ᘱ  ᘲ  ᘳ  ᘴ  ᘵ  ᘶ  ᘷ  ᘸ  ᘹ  ᘺ  ᘻ  ᘼ  ᘽ  ᘾ  ᘿ 
+     164.  ᙀ  ᙁ  ᙂ  ᙃ  ᙄ  ᙅ  ᙆ  ᙇ  ᙈ  ᙉ  ᙊ  ᙋ  ᙌ  ᙍ  ᙎ  ᙏ 
+     165.  ᙐ  ᙑ  ᙒ  ᙓ  ᙔ  ᙕ  ᙖ  ᙗ  ᙘ  ᙙ  ᙚ  ᙛ  ᙜ  ᙝ  ᙞ  ᙟ 
+     166.  ᙠ  ᙡ  ᙢ  ᙣ  ᙤ  ᙥ  ᙦ  ᙧ  ᙨ  ᙩ  ᙪ  ᙫ  ᙬ  ᙭  ᙮  ᙯ 
+     167.  ᙰ  ᙱ  ᙲ  ᙳ  ᙴ  ᙵ  ᙶ  ᙷ  ᙸ  ᙹ  ᙺ  ᙻ  ᙼ  ᙽ  ᙾ  ᙿ 
+     168.     ᚁ  ᚂ  ᚃ  ᚄ  ᚅ  ᚆ  ᚇ  ᚈ  ᚉ  ᚊ  ᚋ  ᚌ  ᚍ  ᚎ  ᚏ 
+     169.  ᚐ  ᚑ  ᚒ  ᚓ  ᚔ  ᚕ  ᚖ  ᚗ  ᚘ  ᚙ  ᚚ  ᚛  ᚜  ᚝  ᚞  ᚟ 
+     16A.  ᚠ  ᚡ  ᚢ  ᚣ  ᚤ  ᚥ  ᚦ  ᚧ  ᚨ  ᚩ  ᚪ  ᚫ  ᚬ  ᚭ  ᚮ  ᚯ 
+     16B.  ᚰ  ᚱ  ᚲ  ᚳ  ᚴ  ᚵ  ᚶ  ᚷ  ᚸ  ᚹ  ᚺ  ᚻ  ᚼ  ᚽ  ᚾ  ᚿ 
+     16C.  ᛀ  ᛁ  ᛂ  ᛃ  ᛄ  ᛅ  ᛆ  ᛇ  ᛈ  ᛉ  ᛊ  ᛋ  ᛌ  ᛍ  ᛎ  ᛏ 
+     16D.  ᛐ  ᛑ  ᛒ  ᛓ  ᛔ  ᛕ  ᛖ  ᛗ  ᛘ  ᛙ  ᛚ  ᛛ  ᛜ  ᛝ  ᛞ  ᛟ 
+     16E.  ᛠ  ᛡ  ᛢ  ᛣ  ᛤ  ᛥ  ᛦ  ᛧ  ᛨ  ᛩ  ᛪ  ᛫  ᛬  ᛭  ᛮ  ᛯ 
+     16F.  ᛰ  ᛱ  ᛲ  ᛳ  ᛴ  ᛵ  ᛶ  ᛷ  ᛸ  ᛹  ᛺  ᛻  ᛼  ᛽  ᛾  ᛿ 
+</pre>
+
+<pre>
+          .0 .1 .2 .3 .4 .5 .6 .7 .8 .9 .A .B .C .D .E .F
+     220.  ∀  ∁  ∂  ∃  ∄  ∅  ∆  ∇  ∈  ∉  ∊  ∋  ∌  ∍  ∎  ∏ 
+     221.  ∐  ∑  −  ∓  ∔  ∕  ∖  ∗  ∘  ∙  √  ∛  ∜  ∝  ∞  ∟ 
+     222.  ∠  ∡  ∢  ∣  ∤  ∥  ∦  ∧  ∨  ∩  ∪  ∫  ∬  ∭  ∮  ∯ 
+     223.  ∰  ∱  ∲  ∳  ∴  ∵  ∶  ∷  ∸  ∹  ∺  ∻  ∼  ∽  ∾  ∿ 
+     224.  ≀  ≁  ≂  ≃  ≄  ≅  ≆  ≇  ≈  ≉  ≊  ≋  ≌  ≍  ≎  ≏ 
+     225.  ≐  ≑  ≒  ≓  ≔  ≕  ≖  ≗  ≘  ≙  ≚  ≛  ≜  ≝  ≞  ≟ 
+     226.  ≠  ≡  ≢  ≣  ≤  ≥  ≦  ≧  ≨  ≩  ≪  ≫  ≬  ≭  ≮  ≯ 
+     227.  ≰  ≱  ≲  ≳  ≴  ≵  ≶  ≷  ≸  ≹  ≺  ≻  ≼  ≽  ≾  ≿ 
+     228.  ⊀  ⊁  ⊂  ⊃  ⊄  ⊅  ⊆  ⊇  ⊈  ⊉  ⊊  ⊋  ⊌  ⊍  ⊎  ⊏ 
+     229.  ⊐  ⊑  ⊒  ⊓  ⊔  ⊕  ⊖  ⊗  ⊘  ⊙  ⊚  ⊛  ⊜  ⊝  ⊞  ⊟ 
+     22A.  ⊠  ⊡  ⊢  ⊣  ⊤  ⊥  ⊦  ⊧  ⊨  ⊩  ⊪  ⊫  ⊬  ⊭  ⊮  ⊯ 
+     22B.  ⊰  ⊱  ⊲  ⊳  ⊴  ⊵  ⊶  ⊷  ⊸  ⊹  ⊺  ⊻  ⊼  ⊽  ⊾  ⊿ 
+     22C.  ⋀  ⋁  ⋂  ⋃  ⋄  ⋅  ⋆  ⋇  ⋈  ⋉  ⋊  ⋋  ⋌  ⋍  ⋎  ⋏ 
+     22D.  ⋐  ⋑  ⋒  ⋓  ⋔  ⋕  ⋖  ⋗  ⋘  ⋙  ⋚  ⋛  ⋜  ⋝  ⋞  ⋟ 
+     22E.  ⋠  ⋡  ⋢  ⋣  ⋤  ⋥  ⋦  ⋧  ⋨  ⋩  ⋪  ⋫  ⋬  ⋭  ⋮  ⋯ 
+     22F.  ⋰  ⋱  ⋲  ⋳  ⋴  ⋵  ⋶  ⋷  ⋸  ⋹  ⋺  ⋻  ⋼  ⋽  ⋾  ⋿ 
+</pre>
+
+<pre>
+          .0 .1 .2 .3 .4 .5 .6 .7 .8 .9 .A .B .C .D .E .F
+     300.  　  、  。  〃  〄  々  〆  〇  〈  〉  《  》  「  」  『  』 
+     301.  【  】  〒  〓  〔  〕  〖  〗  〘  〙  〚  〛  〜  〝  〞  〟 
+     302.  〠  〡  〢  〣  〤  〥  〦  〧  〨  〩   〪   〫   〬   〭   〮   〯 
+     303.  〰  〱  〲  〳  〴  〵  〶  〷  〸  〹  〺  〻  〼  〽  〾  〿 
+     304.  ぀  ぁ  あ  ぃ  い  ぅ  う  ぇ  え  ぉ  お  か  が  き  ぎ  く 
+     305.  ぐ  け  げ  こ  ご  さ  ざ  し  じ  す  ず  せ  ぜ  そ  ぞ  た 
+     306.  だ  ち  ぢ  っ  つ  づ  て  で  と  ど  な  に  ぬ  ね  の  は 
+     307.  ば  ぱ  ひ  び  ぴ  ふ  ぶ  ぷ  へ  べ  ぺ  ほ  ぼ  ぽ  ま  み 
+     308.  む  め  も  ゃ  や  ゅ  ゆ  ょ  よ  ら  り  る  れ  ろ  ゎ  わ 
+     309.  ゐ  ゑ  を  ん  ゔ  ゕ  ゖ  ゗  ゘   ゙   ゚  ゛  ゜  ゝ  ゞ  ゟ 
+     30A.  ゠  ァ  ア  ィ  イ  ゥ  ウ  ェ  エ  ォ  オ  カ  ガ  キ  ギ  ク 
+     30B.  グ  ケ  ゲ  コ  ゴ  サ  ザ  シ  ジ  ス  ズ  セ  ゼ  ソ  ゾ  タ 
+     30C.  ダ  チ  ヂ  ッ  ツ  ヅ  テ  デ  ト  ド  ナ  ニ  ヌ  ネ  ノ  ハ 
+     30D.  バ  パ  ヒ  ビ  ピ  フ  ブ  プ  ヘ  ベ  ペ  ホ  ボ  ポ  マ  ミ 
+     30E.  ム  メ  モ  ャ  ヤ  ュ  ユ  ョ  ヨ  ラ  リ  ル  レ  ロ  ヮ  ワ 
+     30F.  ヰ  ヱ  ヲ  ン  ヴ  ヵ  ヶ  ヷ  ヸ  ヹ  ヺ  ・  ー  ヽ  ヾ  ヿ 
+</pre>
+
+
+</div>
+
+<div id="sidebar">
+  <h2>Static</h2>
+  <ul>
+    <li><a href="../../../prompt/index.html">zsh prompt</a></li>
+    <li><a href="../../../pgp/index.html">PGP</a></li>
+    <li><a href="../../../ssh/index.html">SSH</a></li>
+    <li><a href="../../../MTA/index.html">MTA</a></li>
+    <li><a href="../../../tutorials/index.html">tutorials</a></li>
+    <li><a href="../../../configs/index.html">config files</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/sets/1671829/">desktop</a></li>
+    <li><a href="http://www.librarything.com/catalog/asciiphil">books I own</a></li>
+    <li><a href="../../../stuff/index.html">stuff I'm giving away</a></li>
+    <li><a href="../../../drwho/index.html">Dr. Who eps I have</a></li>
+    <li><a href="http://del.icio.us/phil_g">bookmarks</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/">photos</a></li>
+    <li><a href="../../../about.html">about</a></li>
+  </ul>
+
+  <h2>Directory</h2>
+  <ul class="categories">
+<li><a href="../../index.html">Root</a> (134)
+<ul>
+<li><a href="../../Books/index.html">Books</a> (31)
+</li>
+<li><a href="../../Events/index.html">Events</a> (7)
+<ul>
+<li><a href="../../Events/Burning_Man/index.html">Burning Man</a> (3)
+</li>
+<li><a href="../../Events/Camping/index.html">Camping</a> (2)
+</li>
+<li><a href="../../Events/PDF/index.html">PDF</a> (2)
+</li>
+</ul>
+</li>
+<li><a href="../index.html">Geekery</a> (30)
+<ul>
+<li class="this-category">Test (3)
+</li>
+</ul>
+</li>
+<li><a href="../../General/index.html">General</a> (22)
+</li>
+<li><a href="../../Links/index.html">Links</a> (12)
+<ul>
+<li><a href="../../Links/Slashdot/index.html">Slashdot</a> (1)
+</li>
+</ul>
+</li>
+<li><a href="../../MTA/index.html">MTA</a> (22)
+</li>
+<li><a href="../../Recipes/index.html">Recipes</a> (4)
+</li>
+<li><a href="../../Video_Games/index.html">Video Games</a> (6)
+<ul>
+<li><a href="../../Video_Games/FFXI/index.html">FFXI</a> (1)
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h2>Archive</h2>
+  <table class="month-calendar"><caption class="month-calendar-head"><a title="November 2012 (1)" href="../../2012/11/index.html">&larr;</a><a title="December 2012 ()" href="../../2012/12/index.html">December</a>&rarr;</caption>
+    <tr>
+      <th class="month-calendar-day-head Sunday">Sun</th>
+      <th class="month-calendar-day-head Monday">Mon</th>
+      <th class="month-calendar-day-head Tuesday">Tue</th>
+      <th class="month-calendar-day-head Wednesday">Wed</th>
+      <th class="month-calendar-day-head Thursday">Thu</th>
+      <th class="month-calendar-day-head Friday">Fri</th>
+      <th class="month-calendar-day-head Saturday">Sat</th>
+    </tr>
+    <tr>
+      <td class="month-calendar-day-noday Sunday">&nbsp;</td>
+      <td class="month-calendar-day-noday Monday">&nbsp;</td>
+      <td class="month-calendar-day-noday Tuesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Wednesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Thursday">&nbsp;</td>
+      <td class="month-calendar-day-noday Friday">&nbsp;</td>
+<td class="month-calendar-day-nolink Saturday">1</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">2</td>
+<td class="month-calendar-day-nolink Monday">3</td>
+<td class="month-calendar-day-nolink Tuesday">4</td>
+<td class="month-calendar-day-nolink Wednesday">5</td>
+<td class="month-calendar-day-nolink Thursday">6</td>
+<td class="month-calendar-day-nolink Friday">7</td>
+<td class="month-calendar-day-nolink Saturday">8</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">9</td>
+<td class="month-calendar-day-nolink Monday">10</td>
+<td class="month-calendar-day-nolink Tuesday">11</td>
+<td class="month-calendar-day-nolink Wednesday">12</td>
+<td class="month-calendar-day-nolink Thursday">13</td>
+<td class="month-calendar-day-nolink Friday">14</td>
+<td class="month-calendar-day-nolink Saturday">15</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">16</td>
+<td class="month-calendar-day-nolink Monday">17</td>
+<td class="month-calendar-day-nolink Tuesday">18</td>
+<td class="month-calendar-day-nolink Wednesday">19</td>
+<td class="month-calendar-day-nolink Thursday">20</td>
+<td class="month-calendar-day-nolink Friday">21</td>
+<td class="month-calendar-day-nolink Saturday">22</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">23</td>
+<td class="month-calendar-day-nolink Monday">24</td>
+<td class="month-calendar-day-nolink Tuesday">25</td>
+<td class="month-calendar-day-nolink Wednesday">26</td>
+<td class="month-calendar-day-this-day Thursday">27</td>
+<td class="month-calendar-day-future Friday">28</td>
+<td class="month-calendar-day-future Saturday">29</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-future Sunday">30</td>
+<td class="month-calendar-day-future Monday">31</td>
+      <td class="month-calendar-day-noday Tuesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Wednesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Thursday">&nbsp;</td>
+      <td class="month-calendar-day-noday Friday">&nbsp;</td>
+      <td class="month-calendar-day-noday Saturday">&nbsp;</td>
+</tr>
+</table>
+
+  <table class="year-calendar"><caption class="year-calendar-head"><a title="2011 (3)" href="../../2011/index.html">&larr;</a><a title="2012 (1)" href="../../2012/index.html">2012</a>&rarr;</caption><tr><th class="year-calendar-subhead" colspan="6">Months</th></tr>
+<tr>
+<td class="year-calendar-month-nolink">Jan</td>
+<td class="year-calendar-month-nolink">Feb</td>
+<td class="year-calendar-month-nolink">Mar</td>
+<td class="year-calendar-month-nolink">Apr</td>
+<td class="year-calendar-month-nolink">May</td>
+<td class="year-calendar-month-nolink">Jun</td>
+</tr>
+<tr>
+<td class="year-calendar-month-nolink">Jul</td>
+<td class="year-calendar-month-nolink">Aug</td>
+<td class="year-calendar-month-nolink">Sep</td>
+<td class="year-calendar-month-nolink">Oct</td>
+<td class="year-calendar-month-link"><a title="November 2012 (1)" href="../../2012/11/index.html">Nov</a></td>
+<td class="year-calendar-this-month">Dec</td></tr>
+</table>
+
+
+  <h2>Search</h2>
+  <form method="GET" action="http://www.google.com/custom">
+    <p style="text-align: center">
+      <input type="hidden" name="domains" value="aperiodic.net">
+      <input type="hidden" name="cof" VALUE="GALT:#66CC6;S:http://aperiodic.net/phil/;GL:2;VLC:#CC66CC;AH:center;BGC:#000000;LC:#6666CC;GFNT:#666666;ALC:#CC6666;T:#CCCCCC;GIMP:#FFFFFF;AWFID:d3f1afbc39619250;">
+      <input type="hidden" name="sitesearch" value="aperiodic.net">
+      <input name="q" type="text" size="25" maxlength="255" style="width: 10em"><br>
+      Powered by <a href="http://www.google.com/"><span class="google-G1">G</span><span class="google-o1">o</span><span class="google-o2">o</span><span class="google-g2">g</span><span class="google-l">l</span><span class="google-e">e</span></a>
+    </p>
+  </form>
+
+
+  <h2>Currently Reading</h2>
+
+  <div id="wb55a1f3ca64835526140c06560a0205e"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wb55a1f3ca64835526140c06560a0205e">
+  </script>
+
+  <h2>Recent Books</h2>
+
+  <div id="wa13cfbb5a4be4d629ebe322b83f1e2f6"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wa13cfbb5a4be4d629ebe322b83f1e2f6">
+  </script>
+
+</div>
+
+<div class="hr"><hr></div>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../../../index.html">Back to main page.</a><br>
+</p>
+<ul class="validation">
+  <li>
+  <a href="http://validator.w3.org/check/referer">
+  <img src="http://aperiodic.net/phil/pics/html401.png" alt="Valid HTML 4.01">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://jigsaw.w3.org/css-validator/check/referer">
+  <img src="http://aperiodic.net/phil/pics/validcss.png" alt="Valid CSS 2">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://aperiodic.net/phil/archives/index.rss">
+  <img src="../../../pics/rss10(1).png" alt="RSS syndication">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://feedvalidator.org/check?url=http://aperiodic.net/phil/archives/index.rss">
+  <img src="http://aperiodic.net/phil/pics/validrss.png" alt="Valid RSS 1.0">
+  </a>
+  </li>
+
+</ul>
+
+</html>

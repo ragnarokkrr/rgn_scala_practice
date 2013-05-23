@@ -1,0 +1,73 @@
+body {
+  background-color: #000000;
+  color: #CCCCCC;
+  font-family: "Georgia", "Charter", "Times New Roman", "Times", serif;
+}
+
+h1, h2, h3, h4, h5 { 
+  font-family: "Trebuchet MS", "Verdana", "Arial", sans-serif;
+}
+
+h1 { 
+  font-size: xx-large; 
+  text-align: center;
+}
+h2 {
+  font-size: x-large;
+}
+h3 {
+  font-size: large;
+}
+h4 { 
+  font-size: medium;
+}
+h5 { 
+  font-size: medium;
+}
+
+address {
+  font-size: small;
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
+p.footnote {
+  font-size: small;
+}
+p.footer {
+  font-size: small;
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
+ul.buttons {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+ul.buttons li { 
+  display: inline;
+  list-style-type: none;
+}
+
+a:active {
+  color: #CC6666;
+}
+a:link {
+  color: #6666CC;
+  text-decoration: none;
+}
+a:visited {
+  color: #CC66CC;
+  text-decoration: none;
+}
+a:link:hover, a:visited:hover, a:active:hover {
+  text-decoration: underline;
+}
+a img {
+  border-style: none;
+}
+
+.booktitle { 
+  font-style: italic
+}

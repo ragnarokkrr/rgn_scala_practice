@@ -1,0 +1,500 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Simple SSH Tutorial Outline</title>
+<link rel="stylesheet" type="text/css" href="../default.css">
+</head>
+
+<h1>Simple SSH Tutorial Outline</h1>
+<p>This is the outline for the talk I gave for the UMBC LUG on SSH.  It
+probably won't be terribly helpful, as I wrote it for me, and I know all
+of this anyway, but it might be of some use to other people.  I make no
+guarantees.</p>
+<ol type="I">
+<br><li><b> Concepts</b>
+<ol type="A">
+<br><li> Encryption
+<br><br><i>Scrambles information so other people can't read it.</i>
+<br><ol type="1">
+<br><li> Shared secrets
+<br><br><i>Common case.  There is a "password" (or similar) that both sides must know</i>
+<br><i>to encrypt/decrypt.</i>
+<br><br></li><li> Public keys
+<br><br><i>There is a pair of keys.  Things encrypted with one may only be decrypted</i>
+<br><i>with the other.  Usually, one is kept secret while the other is publically</i>
+<br><i>distributed.</i>
+<br><ol type="a">
+<br><li> Public key authentication
+<br><br><i>If you have the public key, you can use it to check if the other end</i>
+<br><i>really has the private key (thus proving its authenticity).</i>
+<br><br></li><li> Fingerprints
+<br><br><i>When you receive a public key, you may not know if it really belongs to</i>
+<br><i>the person you want to talk to.  One method of verifying keys is via</i>
+<br><i>fingerprints.  If you know the key's fingerprint ahead of time, you can</i>
+<br><i>check that agains the key you have.  (Fingerprints are much shorter than</i>
+<br><i>actual keys and more practical to write down on sheets of paper.)</i>
+<br></li></ol>
+</li></ol>
+<br></li><li> Accessing machines remotely.
+<ol type="1">
+<br><li> Local access
+<br><br><i>When you sit at a computer (and a command line), everything you type goes</i>
+<br><i>directly to the shell (which provides the "command line").</i>
+<br><br></li><li> telnet
+<br><br><i>telnet goes across the network to simulate the same thing.  Whatever you</i>
+<br><i>type is picked up, sent across the network, and sent to the shell on the</i>
+<br><i>remote machine.</i>
+<br><ol type="a">
+<br><li> telnet is plaintext
+<br><br><i>telnet sends everything literally across the network, so anyone watching</i>
+<br><i>the network will see exactly what you type, including things that you</i>
+<br><i>don't even see on the screen (like passwords).</i>
+<br></li></ol>
+<br></li><li> ssh
+<br><br><i>ssh has the same basic concept as telnet--it takes what you type and sends</i>
+<br><i>it across the network to a shell on the remote computer.</i>
+<br><ol type="a">
+<br><li> ssh is encrypted
+<br><br><i>ssh, however, uses encryption to protect your information.  People</i>
+<br><i>watching an ssh session on the network will see only gibberish.</i>
+<br></li></ol>
+</li></ol>
+<br></li><li> Versions of ssh
+<br><br><i>There have been two major versions of the SSH protocol, as well as</i>
+<br><i>multiple implementations of it.</i>
+<br><ol type="1">
+<br><li> The protocol
+<br><br><i>Version 2 has a lot of nice features, including not being vulnerable</i>
+<br><i>to one particular security hole present in the first version of the</i>
+<br><i>protocol.</i>
+<br><br></li><li> Implementations
+<br><br><i>There are three common implementations of ssh.  OpenSSH, F-Secure SSH,</i>
+<br><i>and SSH.com SSH.</i>
+<br><br></li><li> UMBC
+<br><br><i>UMBC uses SSH.com's SSH1, which only supports version 1 of the SSH</i>
+<br><i>protocol.  (It does have compensation code to make the security hole</i>
+<br><i>harder to exploit.)</i>
+<br></li></ol>
+</li></ol>
+<br></li><li><b> Basic SSH</b>
+<ol type="A">
+<br><li> Standard case
+<br><br><i>Usually, ssh is used just as you would telnet.  ssh to a host, type your</i>
+<br><i>password (correctly), and you're in.</i>
+<br><ol type="1">
+<br><li> Example
+<br><br><tt>$ <b>ssh somehost</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>somehost$ </tt>
+<br><br></li><li> Description
+<br><br><i>Note that ssh does not ask for your username as telnet does.  ssh assumes</i>
+<br><i>the username on the remote computer is the same as that on the local one.</i>
+<br></li></ol>
+<br></li><li> Host keys
+<br><br><i>ssh uses public key encryption for the initial conversation with the</i>
+<br><i>host.</i>
+<br><ol type="1">
+<br><li> Usefulness of PKI
+<ol type="a">
+<br><li> Encryption
+<br><br><i>public keys are slow to use, so the ssh client sends a password encrypted</i>
+<br><i>with the server's public key.</i>
+<br><br></li><li> Authentication
+<br><br><i>To prevent a man-in-the-middle attack, the client uses the host key to</i>
+<br><i>verify the host's authenticity.</i>
+<br><ol type="i">
+<br><li> Man-in-the-middle attack
+<br><br><i>Once the data is encrypted on the network, it can only be read by the</i>
+<br><i>intended recipient.  However, someone may set up a computer that pretends</i>
+<br><i>to be the host that you want so you connect to that fake computer instead</i>
+<br><i>of the real one.  The fake computer can then decrypt your data, look at</i>
+<br><i>it, encrypt it again, and send it on to the real host.  Since your data is</i>
+<br><i>going all the way to the real computer (and back), you might never notice</i>
+<br><i>the intrusion.</i>
+<br><br><i>However, since the host's private key is kept secret, a man-in-the-middle</i>
+<br><i>can't fake it and is doomed to failure.</i>
+<br></li></ol>
+</li></ol>
+<br></li><li> Practical considerations
+<br><br><i>When you ssh to a host you've never talked to before, it sends you its</i>
+<br><i>public key.  This is possibly a security hole, since a fake host could get</i>
+<br><i>you to take its key instead at this point.</i>
+<br><ol type="a">
+<br><li> Example
+<br><br><tt>$ <b>ssh somehost</b>
+<br>The authenticity of host 'somehost (192.168.1.1)' can't be established.
+<br>RSA key fingerprint is 90:9c:46:ab:03:1d:30:2c:5c:87:c5:c7:d9:13:5d:75.
+<br>Are you sure you want to continue connecting (yes/no)? <b>yes</b>
+<br>Warning: Permanently added 'somehost' (RSA) to the list of known hosts.
+<br>user@somehost's password: <b>[not shown]</b>
+<br>somehost$</tt>
+<br><br></li><li> Explanation
+<br><br><i>ssh is warning you that it doesn't really know about this host yet.  It</i>
+<br><i>shows you the hostname and IP address, so you can be sure you're talking</i>
+<br><i>to the correct computer.  It also shows the fingerprint of the server's</i>
+<br><i>public key.  If you know what the fingerprint should be, you can check it</i>
+<br><i>and disallow it if it doesn't match.</i>
+<br><br></li><li> Reasonable paranoia
+<br><br><i>Most of the time, it's pretty safe to just accept host keys.  At least</i>
+<br><i>within a controlled environment such as UMBC, it's unlikely that someone</i>
+<br><i>could compromise the network enough to have their computer masquerading</i>
+<br><i>as, say, one of the gl machines.  In other situations, it's up to you to</i>
+<br><i>decide whether to get key information from the server admin before</i>
+<br><i>connecting.</i>
+<br><br></li><li> Changed host key example
+<br><br><tt>$ <b>ssh somehost</b>
+<br>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+<br>@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+<br>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+<br>IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+<br>Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+<br>It is also possible that the RSA host key has just been changed.
+<br>The fingerprint for the RSA key sent by the remote host is
+<br>90:9c:46:ab:03:1d:30:2c:5c:87:c5:c7:d9:13:5d:75.
+<br>Please contact your system administrator.
+<br>Add correct host key in /home/user/.ssh/known_hosts to get rid of this message.
+<br>Offending key in /home/user/.ssh/known_hosts:1
+<br>Password authentication is disabled to avoid man-in-the-middle attacks.
+<br>Agent forwarding is disabled to avoid man-in-the-middle attacks.
+<br>X11 forwarding is disabled to avoid man-in-the-middle attacks.
+<br>Permission denied (publickey,password,keyboard-interactive).
+<br>$ </tt>
+<br></li></ol>
+</li></ol>
+<br></li><li> User names
+<br><br><i>ssh assumes that your username on the remote computer is the same as it is</i>
+<br><i>locally.</i>
+<br><ol type="1">
+<br><li> Different username
+<br><br><tt>$ <b>ssh othername@somehost</b>
+<br>othername@somehost's password: <b>[not shown]</b>
+<br>somehost$</tt>
+<br><br></li><li> Explanation
+<br><br><i>You can specify the username on the command line if it differs from the</i>
+<br><i>local username.  You can also put it in a config file, which comes later.</i>
+<br></li></ol>
+<br></li><li> scp
+<br><br><i>ssh also has a program for copying files across the network.  It encrypts</i>
+<br><i>everything, of course, so neither your password nor the data is visible to</i>
+<br><i>prying eyes.  (FTP, the other most common method for copying files, leaves</i>
+<br><i>both your password and the file visible)</i>
+<br><ol type="1">
+<br><li> Example
+<br><br><tt>$ <b>scp localfile somehost:public_html/</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>localfile            100% |*****************************|  2048 KB 00:03
+<br>$ <b>scp othername@somehost:public_html/index.html ~/public_html/</b>
+<br>othername@somehost's password: <b>[not shown]</b>
+<br>index.html           100% |*****************************| 10198 KB 00:05
+<br>$ </tt>
+<br><br></li><li> Explanation
+<br><br><i>scp works just like cp.  It copies files from one place to another.  The</i>
+<br><i>only things it adds is the possibility of some of those places being on</i>
+<br><i>other computers.  The syntax for a remote computer is to put</i>
+<br><i>'computername:' in front of the file name.  (Note that relative paths are</i>
+<br><i>relative to your home directory.)  Like ssh, you can put 'username@'</i>
+<br><i>before the hostname if your username is different there.</i>
+<br></li></ol>
+</li></ol>
+<br></li><li><b> Intermediate SSH</b>
+<ol type="A">
+<br><li> Remote commands
+<br><br><i>You don't have to connect to a shell on the remote computer.  You can just</i>
+<br><i>tell ssh to run a command remotely and give you its output.</i>
+<br><ol type="1">
+<br><li> Example
+<br><br><tt>$ <b>hostname</b>
+<br>thishost
+<br>$ <b>ssh somehost hostname</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>somehost
+<br>$ </tt>
+<br><br></li><li> Programs that use a terminal
+<br><br><i>Some programs manipulate the terminal as they run.  Usually these are</i>
+<br><i>interactive programs, like pine or emacs.  Normally, ssh will run the</i>
+<br><i>remote command non-interactively and just spit its output back at you.</i>
+<br><i>For terminal-using programs, you must tell ssh to use a pseudoterminal</i>
+<br><i>with the -t option.</i>
+<br><ol type="a">
+<br><li> Example
+<br><br><tt>$ <b>ssh -t somehost pine</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>[pine opens; user reads mail; user exits]
+<br>$ </tt>
+<br></li></ol>
+</li></ol>
+<br></li><li> X11 forwarding
+<br><br><i>Graphical programs use the X Window protocol to display on your screen.</i>
+<br><i>With X, you can run a program on a remote computer have have it display</i>
+<br><i>locally.  Normally, X runs unencrypted over the network.  With ssh's -X</i>
+<br><i>option, you can tell it to use its encrypted connection for X programs.</i>
+<br><ol type="1">
+<br><li> Example
+<br><br><tt>$ <b>ssh -X -f somehost xclock</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>[xclock appears on screen]
+<br>$ </tt>
+<br><br></li><li> Note on -f
+<br><br><i>I also used the -f option here.  -f puts ssh in the background after it</i>
+<br><i>asks for your password.  The above command is the remote equivalent of</i>
+<br><i>'xclock&amp;'.</i>
+<br></li></ol>
+<br></li><li> Config files
+<br><br><i>The config file is ~/.ssh/config and can contain lots of stuff.  (Note</i>
+<br><i>that only the local options file is important--ssh reads it before</i>
+<br><i>connecting to the remote host.)</i>
+<br><ol type="1">
+<br><li> Host &lt;foo&gt;
+<br><br><i>The file is broken up into chunks by Host directives.  Everything after a</i>
+<br><i>Host line applies to that host.  (Until the next Host line, of course.)</i>
+<br><i>The argument after 'Host' is the name that you'd type on the command</i>
+<br><i>line.</i>
+<br><ol type="a">
+<br><li> Host *
+<br><br><i>There is a special hostname, "*", which represents all hosts.  You can use</i>
+<br><i>this hostname to set default values for settings.  (Note that OpenSSH</i>
+<br><i>gives priority to things that are earlier in the file, so 'Host *' must</i>
+<br><i>appear last if you want more specific Host settings to override the</i>
+<br><i>generic ones. (Also note that SSH.com's SSH2 reverses this order;</i>
+<br><i>'Host * must come first there.))</i>
+<br></li></ol>
+<br></li><li> HostName &lt;name&gt;
+<br><br><i>If HostName is specified, ssh will connect to that host instead of the one</i>
+<br><i>specified on the command line.</i>
+<br><ol type="a">
+<br><li> Example
+<br><br><tt>-----
+<br>Host moo
+<br>  HostName supercalifragilisticexpialidocious
+<br>-----
+<br>$ <b>host moo</b>
+<br>moo does not exist
+<br>$ <b>host supercalifragilisticexpialidocious</b>
+<br>supercalifragilisticexpialidocious is 192.168.1.2
+<br>$ <b>ssh moo</b>
+<br>user@moo's password: <b>[not shown]</b>
+<br>supercalifragilisticexpialidocious$</tt>
+<br></li></ol>
+<br></li><li> User &lt;username&gt;
+<br><br><i>When this is present, ssh uses the specified user.  This is much easier</i>
+<br><i>than typing 'user@' on the command line all the time.</i>
+<br><br></li><li> Compression &lt;yes or no&gt;
+<br><br><i>Setting 'Compression yes' turns on data compression, which helps with slow</i>
+<br><i>links.</i>
+<br><br></li><li> Lots of others
+<br><br><i>There's a lot of stuff you can set in the config file.  Check the man page</i>
+<br><i>or SSH book for other things.</i>
+<br></li></ol>
+</li></ol>
+<br></li><li><b> Advanced SSH</b>
+<ol type="A">
+<br><li> RSA authentication
+<br><br><i>ssh can use a number of methods to authenticate you to the remote host.</i>
+<br><i>Passwords are the default, since they're the most common.  A more flexible</i>
+<br><i>approach is to use RSA keys.</i>
+<br><br><i>These work in much the same way that ssh uses the server's host key to</i>
+<br><i>verify the remote computer's identity.</i>
+<br><ol type="1">
+<br><li> Versions
+<br><br><i>The programs and file locations here will work in SSH.com's SSH1 and</i>
+<br><i>OpenSSH.  They are different in SSH2.</i>
+<br><br></li><li> Advantages
+<ol type="a">
+<br><li> Can't be compromised remotely
+<br><br><i>The server never sees your private key, so even if it's compromised the</i>
+<br><i>attacker can't steal your password for other hosts.</i>
+<br><br></li><li> Can use an agent to hold the key
+<br><br><i>If you have a local ssh-agent with your key loaded, ssh will use it</i>
+<br><i>instead of asking you for a password every time.  This is quite convenient</i>
+<br><i>while still pretty secure.</i>
+<br><br><i>(Agents will be covered next.)</i>
+<br><br></li><li> Can restrict keys to executing specific commands
+<br><br><i>If you add 'command="&lt;program&gt;" ' to the beginning of the key's line in</i>
+<br><i>~/.ssh/authorized_keys, anyone authenticating with that key will have</i>
+<br><i>&lt;program&gt; automatically run.  They will not get a shell or any other</i>
+<br><i>program.</i>
+<br><br><i>Check the man page or SSH book for more info.</i>
+<br></li></ol>
+<br></li><li> Creating a key
+<br><br><i>Use ssh-keygen.  I recommend the '-t rsa' option, which creates an RSA key</i>
+<br><i>for use with version 2 of the SSH protocol.  (You can use '-t rsa1' for a</i>
+<br><i>version 1 key and '-t dsa' for a DSA key, which may not be supported</i>
+<br><i>everywhere.)</i>
+<br><br><i>Note that with SSH1 there is no -t option, because there's only one type</i>
+<br><i>of key.</i>
+<br><ol type="a">
+<br><li> Running ssh-keygen
+<br><br><tt>$ <b>ssh-keygen -t rsa</b>
+<br>Generating public/private rsa key pair.
+<br>Enter file in which to save the key (/home/user/.ssh/id_rsa): <b>[press enter for default]</b>
+<br>Enter passphrase (empty for no passphrase): <b>[not shown]</b>
+<br>Enter same passphrase again: <b>[not shown]</b>
+<br>Your identification has been saved in /home/user/.ssh/id_rsa.
+<br>Your public key has been saved in /home/user/.ssh/id_rsa.pub.
+<br>The key fingerprint is:
+<br>44:c8:07:c9:f8:f4:f5:9b:05:d1:0f:d1:05:f0:5d:bf user@localhost
+<br>$ </tt>
+<br></li></ol>
+<br></li><li> Allowing login via that key
+<br><br><i>On the remote host, add the line in /home/user/.ssh/id_rsa.pub to</i>
+<br><i>~/.ssh/authorized_keys.</i>
+<br><ol type="a">
+<br><li> Quick approach
+<br><br><tt>$ <b>scp ~/.ssh/id_rsa.pub somehost:.</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>id_rsa.pub           100% |*****************************|   225 00:00
+<br>$ <b>ssh somehost</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>somehost$ <b>cat id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys</b>
+<br>somehost$ <b>rm id_rsa.pub</b>
+<br>somehost$ <b>exit</b>
+<br>$ <b>ssh somehost</b>
+<br>Enter passphrase for key '/home/user/.ssh/id_rsa': <b>[not shown]</b>
+<br>somehost$ </tt>
+<br></li></ol>
+<br></li><li> Done
+<br><br><i>You can now log in to the remote host using your RSA key.</i>
+<br></li></ol>
+<br></li><li> ssh-agent
+<br><br><i>An ssh-agent is a program that keeps a copy of your key in memory for ssh</i>
+<br><i>programs to use.  (Normally, you have to type the passphrase for the key</i>
+<br><i>every time its needed.)  It makes ssh as easy as this:</i>
+<br><br><tt>$ <b>ssh somehost</b>
+<br>somehost$</tt>
+<br><ol type="1">
+<br><li> Security concerns
+<br><br><i>The agent is pretty good about security.  It never even divulges your</i>
+<br><i>key--ssh programs hand data to it and it does the needed work with the key</i>
+<br><i>itself.  However, there are some possible problems.</i>
+<br><ol type="a">
+<br><li> Unattended use of the agent
+<br><br><i>If you walk away from your computer, someone can sit down at it and ssh</i>
+<br><i>places as you.  Solution: remove the key from the agent when you're going</i>
+<br><i>to be gone from your computer.  (And/or just lock the screen.)</i>
+<br><br></li><li> Tricking the agent
+<br><br><i>If someone else on the computer can act as you (root can do this), they</i>
+<br><i>can give data to the agent and have it processed as if you asked.</i>
+<br><i>Solution: don't run an agent on a computer where you don't trust the</i>
+<br><i>admin.</i>
+<br><br></li><li> Stealing the key
+<br><br><i>Someone with access to the computer's memory (usually, this is only root)</i>
+<br><i>can search through the agent's data and get an unencrypted copy of the</i>
+<br><i>key.  Solution: again, don't run an agent on a computer where you don't</i>
+<br><i>trust the admin.</i>
+<br></li></ol>
+<br></li><li> Starting the agent
+<br><br><i>The procedure for running the agent differes slightly depending on whether</i>
+<br><i>you're running a Bourne Shell derivative such as bash, ksh, or zsh (this</i>
+<br><i>is probably the case) or a C-Shell derivative such as csh or tcsh (this is</i>
+<br><i>less likely).</i>
+<br><ol type="a">
+<br><li> Bourne Shell
+<br><br><tt>$ <b>eval `ssh-agent -s`</b>
+<br>$ </tt>
+<br><br></li><li> C-Shell
+<br><br><tt>&gt; <b>eval `ssh-agent -c`</b>
+<br>&gt; </tt>
+<br></li></ol>
+<br></li><li> Adding and removing keys
+<br><br><i>Key management with an agent is done via the ssh-add program.</i>
+<br><ol type="a">
+<br><li> Adding keys
+<br><br><tt>$ <b>ssh-add ~/.ssh/id_rsa</b>
+<br>Enter passphrase for /home/user/.ssh/id_rsa: <b>[not shown]</b>
+<br>Identity added: /home/user/.ssh/id_rsa (/home/user/.ssh/id_rsa)
+<br>$ </tt>
+<br><br></li><li> Listing
+<br><br><tt>$ <b>ssh-add -l</b>
+<br>1024 75:a4:2c:9b:b1:58:8f:9c:96:d8:99:77:fc:01:0d:8a /home/user/.ssh/id_rsa (RSA)
+<br>$ </tt>
+<br><br></li><li> Removing keys
+<br><br><tt>$ <b>ssh-add -d ~/.ssh/id_rsa</b>
+<br>Identity removed: /home/user/.ssh/id_rsa (/home/user/.ssh/id_rsa.pub)
+<br>$ </tt>
+<br></li></ol>
+<br></li><li> Using the agent
+<br><br><i>Once the keys are loaded, the agent is used automatically.</i>
+<br><br><tt>$ <b>ssh somehost</b>
+<br>somehost$ </tt>
+<br><br></li><li> Note on multiple shells
+<br><br><i>The agent's setup is only designed to work with a single shell.  All you</i>
+<br><i>really need to do to have multiple shells (e.g. multiple xterms, etc.) use</i>
+<br><i>the same agent is to copy the value of the environment variable</i>
+<br><i>$SSH_AUTH_SOCK from one to the other.</i>
+<br><br><tt>$ <b>echo $SSH_AUTH_SOCK</b>
+<br>/tmp/ssh-XXLN11Tv/agent.953
+<br><i>[In another shell on the came computer:]</i>
+<br>$ <b>export SSH_AUTH_SOCK=/tmp/ssh-XXLN11Tv/agent.953</b>
+<br>$ </tt>
+<br>
+<br><i>(Note that in C-Shell derivatives, the command is</i>
+<br><i>'setenv SSH_AUTH_SOCK <path>').</path></i>
+<br><ol type="a">
+<br><li> keychain
+<br><br><i>I use a program called 'keychain' to manage multiple shells with the same</i>
+<br><i>ssh agent.  You can install it and read the documentation for more info,</i>
+<br><i>but basically, all you need to do is run 'keychain ~/.ssh/id_rsa' in your</i>
+<br><i>of your shell's startup files, and it will check for an existing agent,</i>
+<br><i>connect to it if it exists, and create a new one (loading the supplied</i>
+<br><i>key) if it doesn't.</i>
+<br></li></ol>
+<br></li><li> Exiting the agent
+<br><br><i>From the shell where you started it, run 'eval `ssh-agent -k`' and the</i>
+<br><i>running agent will be shut down.  If you copied $SSH_AUTH_SOCK to other</i>
+<br><i>shells, those variables will have to be unset by hand.</i>
+<br></li></ol>
+<br></li><li> Port forwarding
+<br><br><i>The ssh program can also be told to listen on arbitrary ports eith on the</i>
+<br><i>local or remote computer, forward any data through the encrypted</i>
+<br><i>connection, and send it to some other destination from the other end.</i>
+<br><ol type="1">
+<br><li> More concrete example
+<ol type="a">
+<br><li> Scenario
+<br><br><i>I have a web proxy on a remote computer.  I want my local browser to use</i>
+<br><i>an encrypted connection to that computer to use the proxy.</i>
+<br><i>So, ssh will listen for connections locally, forward the data across the</i>
+<br><i>encrypted connection and send it to the proxy on the remote computer.  My</i>
+<br><i>web browser will be told to use a port on the local browser as its proxy.</i>
+<br><br></li><li> Numbers
+<br><br><i>The remote computer is somehost.  The local computer is localhost.  The</i>
+<br><i>proxy is listening on port 5865 on the remote host.  I'll have ssh use</i>
+<br><i>port 5001 on the local host.</i>
+<br><br></li><li> Commands
+<br><br><tt>$ <b>ssh -L 5001:somehost:5865 somehost</b>
+<br>user@somehost's password: <b>[not shown]</b>
+<br>somehost$ </tt>
+<br><br></li><li> Explanation
+<br><br><i>The -L option tells ssh to listen on the local host and forward to the</i>
+<br><i>remote host.  (Use the -R option for the reverse situation.)</i>
+<br><i>The first number is the port to listen on at the local computer.  In this</i>
+<br><i>case, it's 5001.</i>
+<br><br><i>The second value is the computer to which the data should go after it</i>
+<br><i>comes out of the encrypted connection.  (Since this example has the data</i>
+<br><i>going to the same computer as the connection goes to, I could have used</i>
+<br><i>the special name 'localhost', but avoided that, as it would confuse</i>
+<br><i>things.)  Yes, the computer specified can be any computer on the network.</i>
+<br><i>The last number is the port that the data will be sent to on the</i>
+<br><i>destination computer.  In this example, that port is 5865, where the web</i>
+<br><i>proxy is listening.</i>
+<br><br><i>I would then set my browser to use 'localhost:5001' as its HTTP proxy.</i>
+<br><i>The tunnel remains open for as long as you're conencted via ssh.</i>
+<br></li></ol>
+<br></li><li> Listening non-locally
+<br><br><i>Normally, OpenSSH will only accept connection from the computer on which</i>
+<br><i>it's listening.  If you want other computers on the network to use the</i>
+<br><i>encrypted tunnel, you must also use the -g option to ssh.</i>
+<br><br></li><li> Tunnel without a terminal
+<br><br><i>OpenSSH has a -N option that can be used to just create an encrypted</i>
+<br><i>tunnel without opening a shell on the remote computer.  The tunnel remains</i>
+<br><i>open until the client ssh is killed.</i>
+
+<p></p>
+
+</li></ol></li></ol></li></ol>
+<hr>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../index.htm">Back to main page.</a><br>
+</p>
+</body></html>

@@ -1,0 +1,356 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scape=1.0; user-scalable=false;">
+  <link rel="apple-touch-icon" href="/phil/avatar-iphone.png">
+  <title>Nov 2012  :: Phil! Gold</title>
+
+  <meta name="DC.title" content="Phil! Gold">
+
+  <link rel="openid.server" href="http://www.livejournal.com/openid/server.bml">
+  <link rel="openid.delegate" href="http://phil-g.livejournal.com/">
+
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://aperiodic.net/phil/archives/index.rss">
+  <link rel="stylesheet" type="text/css" href="../../../default.css">
+  <link rel="stylesheet" type="text/css" href="../../../blog.css">
+
+</head>
+
+<body>
+
+<div id="header">
+  <h1>Phil! Gold :: Nov 2012 </h1>
+</div>
+
+<div id="content">
+<h2>Fri, 09 Nov 2012</h2>
+
+<div class="story-title" id="org-mode-project-overviews">
+  <h3>Org-Mode and Project Overviews</h3>
+  <div class="title-links">
+    9:56AM |
+    <a href="../../Geekery.htm" >Geekery</a> |
+    
+    <a href="../../Geekery/org-mode-project-overviews.htm" title="permalink for Org-Mode and Project Overviews" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I recently started a new job and my new manager wanted me to give him a
+periodically-updated task list showing what I was working on, its
+progress, and any deadlines I had.  I like Emacs' <a href="http://orgmode.org/">Org Mode</a>, so
+I set out to set up something in Org Mode that worked for both of us.
+This is my story.</p>
+
+<p>In general, I want to have a main directory for my files and, within that
+directory, use a separate file for each distinct project I work on.  My
+manager wanted to easily see project progress via milestones, so each
+level-1 heading represents a milestone, while the deeper headings are more
+fluid and are more for my benefit than his.  It was pretty easy to set up
+HTML publishing from the Org file directory to a web server, so my manager
+could browse through the details of my org files.</p>
+
+<p>My manager also, however, wanted to see an overview page with sections for
+current, future, and recently-past projects, with detail lines for the
+milestones on current projects.  That proved to be the trickiest thing to
+implement:  since I dislike repeating myself, I wanted as much of the
+"current project status" part of the overview to be automatically
+generated from the individual project files, including any milestone
+deadlines but ignoring all of the more minor details.</p>
+
+<p>Org Mode is big, so I spent a while reading through the manual about
+custom agenda views and such until I stumbled on the <code>C-c / d</code> key
+sequence, which folds all the file's subheadings and displays any
+deadlines on the level-1 headings.  In combination with <code>C-c C-e v Spc</code>,
+which exports only the visible portions of the current buffer to a new
+org-mode buffer, I was able to create an org-mode formatted project
+overview.  Thus, my general overview page (named index.org so it becomes
+index.html during publishing) looks something like this:</p>
+
+<pre><code>* Active Projects
+
+** [[file:project-1.org][Project 1 Description]]
+   DEADLINE: &lt;2012-11-16 Fri&gt;
+#+INCLUDE: "project-1.org_overview" :minlevel 2
+
+** [[file:project-2.org][Project 2 Description]]
+   DEADLINE: &lt;2012-11-30 Fri&gt;
+#+INCLUDE: "project-2.org_overview" :minlevel 2
+
+* Future Projects
+
+** [[file:project-a.org][Project A Description]]
+** [[file:project-b.org][Project B Description]]
+
+* Recently Completed Projects
+
+** [2012-11-01] [[file:project-x.org][Project X Description]]
+</code></pre>
+
+<p>I added a few CSS tweaks at the top of the index.org file to better fit
+its purpose.  Mostly, they just put related things closer together and
+deemphasize some of the extra information on the page:</p>
+
+<pre><code>#+OPTIONS:   H:2 num:nil toc:nil tasks:t
+#+STYLE: &lt;style&gt;
+#+STYLE: .outline-3 h3 {
+#+STYLE:   margin-bottom: 0;
+#+STYLE: }
+#+STYLE: .outline-text-3 p {
+#+STYLE:   margin: 0;
+#+STYLE: }
+#+STYLE: .outline-4 {
+#+STYLE:   line-height: 0.5em;
+#+STYLE: }
+#+STYLE: .outline-text-4 {
+#+STYLE:   font-size: 0.75em;
+#+STYLE: }
+#+STYLE: .outline-4 h4 {
+#+STYLE:   margin-bottom: 0;
+#+STYLE: }
+#+STYLE: &lt;/style&gt;
+</code></pre>
+
+<p>I also wrote the following two elisp functions.  The first one generates
+the overview file for a given buffer, while the second looks through a
+buffer for included overview files and regenerates all of them.</p>
+
+<pre><code>(defun org-export-overview (file)
+  (save-window-excursion
+    (find-file file)
+    (org-check-deadlines org-deadline-warning-days)
+    (org-export-visible ?\  0) ; calls switch-to-buffer-other-window
+    (write-file (concat file "_overview"))
+    (kill-buffer)))
+
+(defun org-export-overviews-for (buffer-or-name)
+  (let ((plan-dir (file-name-directory (buffer-file-name (get-buffer buffer-or-name)))))
+    (with-current-buffer buffer-or-name
+      (save-excursion
+        (goto-char 1)
+        (while (re-search-forward "^#\\+INCLUDE: +\"\\(.*\\)_overview\"" nil t)
+          (org-export-overview (concat plan-dir (match-string 1))))))))
+</code></pre>
+
+<p>Finally, I wrote a simple function that goes through all the stuff I need
+to publish my org files and I call that hourly, so my manager can see my
+current project status at pretty much any time with no manual steps on my
+part:</p>
+
+<pre><code>(defun pmg-org-publish ()
+  (org-save-all-org-buffers)
+  (org-export-overviews-for "index.org")
+  (org-publish-all))
+
+(run-at-time "00:45" 3600 'pmg-org-publish)
+</code></pre>
+
+<p>All I need to do is periodically update index.org as I add or complete
+projects, and the rest of my work is done, as it normally is, in the
+project files.  Thanks, Org Mode!</p>
+
+
+</div>
+
+<div id="sidebar">
+  <h2>Static</h2>
+  <ul>
+    <li><a href="../../../prompt/index.htm">zsh prompt</a></li>
+    <li><a href="../../../pgp/index.htm">PGP</a></li>
+    <li><a href="../../../ssh/index.htm">SSH</a></li>
+    <li><a href="../../../MTA/index.htm">MTA</a></li>
+    <li><a href="../../../tutorials/index.htm">tutorials</a></li>
+    <li><a href="../../../configs/index.htm">config files</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/sets/1671829/">desktop</a></li>
+    <li><a href="http://www.librarything.com/catalog/asciiphil">books I own</a></li>
+    <li><a href="../../../stuff/index.htm">stuff I'm giving away</a></li>
+    <li><a href="../../../drwho/index.htm">Dr. Who eps I have</a></li>
+    <li><a href="http://del.icio.us/phil_g">bookmarks</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/">photos</a></li>
+    <li><a href="../../../about.htm">about</a></li>
+  </ul>
+
+  <h2>Directory</h2>
+  <ul class="categories">
+<li class="this-category">Root (134)
+<ul>
+<li><a href="../../Books/index.htm">Books</a> (31)
+</li>
+<li><a href="../../Events/index.htm">Events</a> (7)
+<ul>
+<li><a href="../../Events/Burning_Man/index.htm">Burning Man</a> (3)
+</li>
+<li><a href="../../Events/Camping/index.htm">Camping</a> (2)
+</li>
+<li><a href="../../Events/PDF/index.htm">PDF</a> (2)
+</li>
+</ul>
+</li>
+<li><a href="../../Geekery/index.htm">Geekery</a> (30)
+<ul>
+<li><a href="../../Geekery/Test/index.htm">Test</a> (3)
+</li>
+</ul>
+</li>
+<li><a href="../../General/index.htm">General</a> (22)
+</li>
+<li><a href="../../Links/index.htm">Links</a> (12)
+<ul>
+<li><a href="../../Links/Slashdot/index.htm">Slashdot</a> (1)
+</li>
+</ul>
+</li>
+<li><a href="../../MTA/index.htm">MTA</a> (22)
+</li>
+<li><a href="../../Recipes/index.htm">Recipes</a> (4)
+</li>
+<li><a href="../../Video_Games/index.htm">Video Games</a> (6)
+<ul>
+<li><a href="../../Video_Games/FFXI/index.htm">FFXI</a> (1)
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h2>Archive</h2>
+  <table class="month-calendar"><caption class="month-calendar-head"><a title="October 2011 (1)" href="../../2011/10/index.htm">&larr;</a><a title="November 2012 (1)" href="index.htm">November</a>&rarr;</caption>
+    <tr>
+      <th class="month-calendar-day-head Sunday">Sun</th>
+      <th class="month-calendar-day-head Monday">Mon</th>
+      <th class="month-calendar-day-head Tuesday">Tue</th>
+      <th class="month-calendar-day-head Wednesday">Wed</th>
+      <th class="month-calendar-day-head Thursday">Thu</th>
+      <th class="month-calendar-day-head Friday">Fri</th>
+      <th class="month-calendar-day-head Saturday">Sat</th>
+    </tr>
+    <tr>
+      <td class="month-calendar-day-noday Sunday">&nbsp;</td>
+      <td class="month-calendar-day-noday Monday">&nbsp;</td>
+      <td class="month-calendar-day-noday Tuesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Wednesday">&nbsp;</td>
+<td class="month-calendar-day-nolink Thursday">1</td>
+<td class="month-calendar-day-nolink Friday">2</td>
+<td class="month-calendar-day-nolink Saturday">3</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">4</td>
+<td class="month-calendar-day-nolink Monday">5</td>
+<td class="month-calendar-day-nolink Tuesday">6</td>
+<td class="month-calendar-day-nolink Wednesday">7</td>
+<td class="month-calendar-day-nolink Thursday">8</td>
+<td class="month-calendar-day-link Friday"><a title="Friday, 9 November 2012 (1)" href="09/index.htm">9</a></td>
+<td class="month-calendar-day-nolink Saturday">10</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">11</td>
+<td class="month-calendar-day-nolink Monday">12</td>
+<td class="month-calendar-day-nolink Tuesday">13</td>
+<td class="month-calendar-day-nolink Wednesday">14</td>
+<td class="month-calendar-day-nolink Thursday">15</td>
+<td class="month-calendar-day-nolink Friday">16</td>
+<td class="month-calendar-day-nolink Saturday">17</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">18</td>
+<td class="month-calendar-day-nolink Monday">19</td>
+<td class="month-calendar-day-nolink Tuesday">20</td>
+<td class="month-calendar-day-nolink Wednesday">21</td>
+<td class="month-calendar-day-nolink Thursday">22</td>
+<td class="month-calendar-day-nolink Friday">23</td>
+<td class="month-calendar-day-nolink Saturday">24</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">25</td>
+<td class="month-calendar-day-nolink Monday">26</td>
+<td class="month-calendar-day-nolink Tuesday">27</td>
+<td class="month-calendar-day-nolink Wednesday">28</td>
+<td class="month-calendar-day-nolink Thursday">29</td>
+<td class="month-calendar-day-nolink Friday">30</td>
+      <td class="month-calendar-day-noday Saturday">&nbsp;</td>
+</tr>
+</table>
+
+  <table class="year-calendar"><caption class="year-calendar-head"><a title="2011 (3)" href="../../2011/index.htm">&larr;</a><a title="2012 (1)" href="../index.htm">2012</a>&rarr;</caption><tr><th class="year-calendar-subhead" colspan="6">Months</th></tr>
+<tr>
+<td class="year-calendar-month-nolink">Jan</td>
+<td class="year-calendar-month-nolink">Feb</td>
+<td class="year-calendar-month-nolink">Mar</td>
+<td class="year-calendar-month-nolink">Apr</td>
+<td class="year-calendar-month-nolink">May</td>
+<td class="year-calendar-month-nolink">Jun</td>
+</tr>
+<tr>
+<td class="year-calendar-month-nolink">Jul</td>
+<td class="year-calendar-month-nolink">Aug</td>
+<td class="year-calendar-month-nolink">Sep</td>
+<td class="year-calendar-month-nolink">Oct</td>
+<td class="year-calendar-this-month"><a title="November 2012 (1)" href="index.htm">Nov</a></td><td class="year-calendar-month-future">Dec</td>
+</tr>
+</table>
+
+
+  <h2>Search</h2>
+  <form method="GET" action="http://www.google.com/custom">
+    <p style="text-align: center">
+      <input type="hidden" name="domains" value="aperiodic.net">
+      <input type="hidden" name="cof" VALUE="GALT:#66CC6;S:http://aperiodic.net/phil/;GL:2;VLC:#CC66CC;AH:center;BGC:#000000;LC:#6666CC;GFNT:#666666;ALC:#CC6666;T:#CCCCCC;GIMP:#FFFFFF;AWFID:d3f1afbc39619250;">
+      <input type="hidden" name="sitesearch" value="aperiodic.net">
+      <input name="q" type="text" size="25" maxlength="255" style="width: 10em"><br>
+      Powered by <a href="http://www.google.com/"><span class="google-G1">G</span><span class="google-o1">o</span><span class="google-o2">o</span><span class="google-g2">g</span><span class="google-l">l</span><span class="google-e">e</span></a>
+    </p>
+  </form>
+
+
+  <h2>Currently Reading</h2>
+
+  <div id="wb55a1f3ca64835526140c06560a0205e"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wb55a1f3ca64835526140c06560a0205e">
+  </script>
+
+  <h2>Recent Books</h2>
+
+  <div id="wa13cfbb5a4be4d629ebe322b83f1e2f6"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wa13cfbb5a4be4d629ebe322b83f1e2f6">
+  </script>
+
+</div>
+
+<div class="hr"><hr></div>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../../../index.htm">Back to main page.</a><br>
+</p>
+<ul class="validation">
+  <li>
+  <a href="http://validator.w3.org/check/referer">
+  <img src="http://aperiodic.net/phil/pics/html401.png" alt="Valid HTML 4.01">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://jigsaw.w3.org/css-validator/check/referer">
+  <img src="http://aperiodic.net/phil/pics/validcss.png" alt="Valid CSS 2">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://aperiodic.net/phil/archives/index.rss">
+  <img src="../../../pics/rss10.png" alt="RSS syndication">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://feedvalidator.org/check?url=http://aperiodic.net/phil/archives/index.rss">
+  <img src="http://aperiodic.net/phil/pics/validrss.png" alt="Valid RSS 1.0">
+  </a>
+  </li>
+
+</ul>
+
+</html>

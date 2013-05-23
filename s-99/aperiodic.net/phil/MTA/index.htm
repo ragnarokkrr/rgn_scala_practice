@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>PalmOS Maryland MTA Schedules</title>
+    <link rel="stylesheet" type="text/css" href="../default.css">
+  </head>
+
+  <body>
+    <h1>PalmOS Maryland MTA Schedules</h1>
+
+    <p>I use the <a href="http://www.mtamaryland.com">Maryland MTA</a>.  I
+      used to have a palm pilot.  When I did, I liked using
+      <a href="http://trainsched.sourceforge.net/">trainsched</a>.  In
+      order to use trainsched, I had to write some scripts to generate the
+      appropriate palm databases.  Here, you get to benefit from my
+      work.</p>
+
+    <p>I draw my data from
+      the <a href="http://mta.maryland.gov/about/publicgtfsdata.cfm">MTA's
+        GTFS feed</a>.  Other GTFS feeds (see
+      the <a href="http://www.gtfs-data-exchange.com/">GTFS data
+        exchange</a> for a nice list) should work, too.</p>
+
+    <p>Note that the trainsched CSV format has changed over time.  These
+      scripts target trainsched version 1.0, the latest version as of this
+      writing.</p>
+
+    <h2>Scripts</h2>
+
+    <p>The scripts I use to turn the MTA's GTFS data into palm databases
+      are available for your use, since I don't want to go through the
+      work of converting all of their schedules.  These are public domain.
+      Have fun.  Feel free to let me know if you make changes to them to
+      fix or add stuff.</p>
+
+    <p>You will at least need python
+      and <a href="https://code.google.com/p/googletransitdatafeed/wiki/TransitFeed">the
+        transitfeed module</a> in order for this to work.</p>
+
+    <ul>
+      <li><a href="http://aperiodic.net/phil/MTA/gtfs2csv.py">gtfs2csv.py</a> - generates a trainsched
+        CSV file from a GTFS feed.</li>
+      <li><a href="README.htm">README</a> - directions on how to use the
+        script.</li>
+      <li><a href="COPYING.htm">COPYING</a> - license terms.</li>
+    </ul>
+
+    <hr>
+    <address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+    <p class="footer">
+      <a href="../index.htm">Back to main page.</a><br>
+    </p>
+  </body>
+</html>

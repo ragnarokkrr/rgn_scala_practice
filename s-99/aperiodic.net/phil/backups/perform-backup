@@ -1,0 +1,56 @@
+#!/bin/sh
+
+if [ $(id -u) -ne 0 ]; then
+    echo "This must be run as root." 1>&2
+    exit 1
+fi
+
+if [ "$1" = "local" ]; then
+    uuid=$(cat /etc/backups/local-uuid)
+elif [ "$1" = "offsite" ]; then
+    uuid=$(cat /etc/backups/offsite-uuid)
+else
+    echo "Must provide backup type (local, offsite) as the first parameter." 1>&2
+    exit 1
+fi
+
+if [ \! -e /dev/disk/by-uuid/$uuid ]; then
+    echo "No disk with that UUID is currently present on the system." 1>&2
+    exit 1
+fi
+
+if [ -e /etc/backup-key ]; then
+    key_file="--key-file /etc/backup-key"
+else
+    key_file=""
+fi
+
+mount_dir=/media/backups-$1
+
+mkdir $mount_dir
+if cryptsetup $key_file luksOpen /dev/disk/by-uuid/$uuid backups-$1; then
+    if mount -t auto /dev/mapper/backups-$1 $mount_dir; then
+        last_num=$(ls -t $mount_dir | head -1)
+        num=$(($last_num+1))
+
+        for dir in etc var phil postgresql mysql rivana; do
+            mkdir -p $mount_dir/$num/$dir
+        done
+        chmod a-w $mount_dir/$num
+        chown rivana $mount_dir/$num/rivana
+        chown postgres $mount_dir/$num/postgresql
+        rsync -a --filter 'merge /etc/backups/etc-filter' --link-dest=$mount_dir/$last_num/etc /etc/ $mount_dir/$num/etc/
+        rsync -a --filter 'merge /etc/backups/var-filter' --link-dest=$mount_dir/$last_num/var /var/ $mount_dir/$num/var/
+        rsync -a --filter 'merge /etc/backups/phil-filter' --link-dest=$mount_dir/$last_num/phil /home/phil/ $mount_dir/$num/phil/
+        su -c "pg_dumpall >$mount_dir/$num/postgresql/dump" postgres
+        mysqldump --all-databases >$mount_dir/$num/mysql/dump
+
+        umount $mount_dir || exit 1
+    else
+        echo "Error mounting /dev/mapper/backups-$1 onto $mount_dir." 1>&2
+    fi
+    cryptsetup luksClose backups-$1 || exit 1
+else
+    echo "Error opening /dev/disk/by-uuid/$uuid as a LUKS device." 1>&2
+fi
+rmdir $mount_dir

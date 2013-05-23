@@ -1,0 +1,1179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scape=1.0; user-scalable=false;">
+  <link rel="apple-touch-icon" href="/phil/avatar-iphone.png">
+  <title>Geekery :: Phil! Gold</title>
+
+  <meta name="DC.title" content="Phil! Gold">
+
+  <link rel="openid.server" href="http://www.livejournal.com/openid/server.bml">
+  <link rel="openid.delegate" href="http://phil-g.livejournal.com/">
+
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://aperiodic.net/phil/archives/index.rss">
+  <link rel="stylesheet" type="text/css" href="../default(1).css">
+  <link rel="stylesheet" type="text/css" href="../blog(1).css">
+
+</head>
+
+<body>
+
+<div id="header">
+  <h1>Phil! Gold :: Geekery</h1>
+</div>
+
+<div id="content">
+<h2>Fri, 09 Nov 2012</h2>
+
+<div class="story-title" id="org-mode-project-overviews">
+  <h3>Org-Mode and Project Overviews</h3>
+  <div class="title-links">
+    9:56AM |
+    <a href="Geekery(1)" >Geekery</a> |
+    
+    <a href="Geekery/org-mode-project-overviews.html" title="permalink for Org-Mode and Project Overviews" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I recently started a new job and my new manager wanted me to give him a
+periodically-updated task list showing what I was working on, its
+progress, and any deadlines I had.  I like Emacs' <a href="http://orgmode.org/">Org Mode</a>, so
+I set out to set up something in Org Mode that worked for both of us.
+This is my story.</p>
+
+<p>In general, I want to have a main directory for my files and, within that
+directory, use a separate file for each distinct project I work on.  My
+manager wanted to easily see project progress via milestones, so each
+level-1 heading represents a milestone, while the deeper headings are more
+fluid and are more for my benefit than his.  It was pretty easy to set up
+HTML publishing from the Org file directory to a web server, so my manager
+could browse through the details of my org files.</p>
+
+<p>My manager also, however, wanted to see an overview page with sections for
+current, future, and recently-past projects, with detail lines for the
+milestones on current projects.  That proved to be the trickiest thing to
+implement:  since I dislike repeating myself, I wanted as much of the
+"current project status" part of the overview to be automatically
+generated from the individual project files, including any milestone
+deadlines but ignoring all of the more minor details.</p>
+
+<p>Org Mode is big, so I spent a while reading through the manual about
+custom agenda views and such until I stumbled on the <code>C-c / d</code> key
+sequence, which folds all the file's subheadings and displays any
+deadlines on the level-1 headings.  In combination with <code>C-c C-e v Spc</code>,
+which exports only the visible portions of the current buffer to a new
+org-mode buffer, I was able to create an org-mode formatted project
+overview.  Thus, my general overview page (named index.org so it becomes
+index.html during publishing) looks something like this:</p>
+
+<pre><code>* Active Projects
+
+** [[file:project-1.org][Project 1 Description]]
+   DEADLINE: &lt;2012-11-16 Fri&gt;
+#+INCLUDE: "project-1.org_overview" :minlevel 2
+
+** [[file:project-2.org][Project 2 Description]]
+   DEADLINE: &lt;2012-11-30 Fri&gt;
+#+INCLUDE: "project-2.org_overview" :minlevel 2
+
+* Future Projects
+
+** [[file:project-a.org][Project A Description]]
+** [[file:project-b.org][Project B Description]]
+
+* Recently Completed Projects
+
+** [2012-11-01] [[file:project-x.org][Project X Description]]
+</code></pre>
+
+<p>I added a few CSS tweaks at the top of the index.org file to better fit
+its purpose.  Mostly, they just put related things closer together and
+deemphasize some of the extra information on the page:</p>
+
+<pre><code>#+OPTIONS:   H:2 num:nil toc:nil tasks:t
+#+STYLE: &lt;style&gt;
+#+STYLE: .outline-3 h3 {
+#+STYLE:   margin-bottom: 0;
+#+STYLE: }
+#+STYLE: .outline-text-3 p {
+#+STYLE:   margin: 0;
+#+STYLE: }
+#+STYLE: .outline-4 {
+#+STYLE:   line-height: 0.5em;
+#+STYLE: }
+#+STYLE: .outline-text-4 {
+#+STYLE:   font-size: 0.75em;
+#+STYLE: }
+#+STYLE: .outline-4 h4 {
+#+STYLE:   margin-bottom: 0;
+#+STYLE: }
+#+STYLE: &lt;/style&gt;
+</code></pre>
+
+<p>I also wrote the following two elisp functions.  The first one generates
+the overview file for a given buffer, while the second looks through a
+buffer for included overview files and regenerates all of them.</p>
+
+<pre><code>(defun org-export-overview (file)
+  (save-window-excursion
+    (find-file file)
+    (org-check-deadlines org-deadline-warning-days)
+    (org-export-visible ?\  0) ; calls switch-to-buffer-other-window
+    (write-file (concat file "_overview"))
+    (kill-buffer)))
+
+(defun org-export-overviews-for (buffer-or-name)
+  (let ((plan-dir (file-name-directory (buffer-file-name (get-buffer buffer-or-name)))))
+    (with-current-buffer buffer-or-name
+      (save-excursion
+        (goto-char 1)
+        (while (re-search-forward "^#\\+INCLUDE: +\"\\(.*\\)_overview\"" nil t)
+          (org-export-overview (concat plan-dir (match-string 1))))))))
+</code></pre>
+
+<p>Finally, I wrote a simple function that goes through all the stuff I need
+to publish my org files and I call that hourly, so my manager can see my
+current project status at pretty much any time with no manual steps on my
+part:</p>
+
+<pre><code>(defun pmg-org-publish ()
+  (org-save-all-org-buffers)
+  (org-export-overviews-for "index.org")
+  (org-publish-all))
+
+(run-at-time "00:45" 3600 'pmg-org-publish)
+</code></pre>
+
+<p>All I need to do is periodically update index.org as I add or complete
+projects, and the rest of my work is done, as it normally is, in the
+project files.  Thanks, Org Mode!</p>
+
+
+<h2>Fri, 07 Oct 2011</h2>
+
+<div class="story-title" id="so-many-dolfields">
+  <h3>Why are there so many Dolfield Roads?</h3>
+  <div class="title-links">
+    6:34PM |
+    <a href="Geekery(1)" >Geekery</a> |
+    
+    <a href="Geekery/so-many-dolfields.html" title="permalink for Why are there so many Dolfield Roads?" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>A question that perturbed me when I lived in Owings Mills was why there
+were so many roads named "Dolfield".  There are three different Dolfield
+Roads, one South Dolfield Road, and three Dolfield Boulevards.  I finally
+got around to researching the question, and now I share the answer (to the
+degreee that I have one) with everyone.</p>
+
+<p>This is a map of Dolfield Road, past and present:</p>
+
+<script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+
+<script type="text/javascript">
+  // Start position for the map
+  var dolfield_rd_lat=39.4077329;
+  var dolfield_rd_lon=-76.80413865;
+  var dolfield_rd_zoom=15;
+
+  var dolfield_rd_map;  
+  function init_dolfield_rd() {
+    dolfield_rd_map = new OpenLayers.Map ("dolfield_rd_map", {
+        controls:[
+            new OpenLayers.Control.Navigation(),
+            new OpenLayers.Control.PanZoom(),
+            new OpenLayers.Control.Attribution(),
+            new OpenLayers.Control.LayerSwitcher()],
+        maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+        maxResolution: 156543.0399,
+        numZoomLevels: 19,
+        units: 'm',
+        projection: new OpenLayers.Projection("EPSG:900913"),
+        displayProjection: new OpenLayers.Projection("EPSG:4326")
+    } );
+
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM("MapQuest", ["http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile2.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile3.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile4.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png"], {numZoomLevels: 19}));
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM.Osmarender("Osmarender"));
+    dolfield_rd_map.addLayer(new OpenLayers.Layer.OSM.CycleMap("CycleMap"));
+
+    dolfield_rd_map.addLayer(
+      new OpenLayers.Layer.Vector("Dolfield Rd (original)",
+                       { style: { strokeColor: "blue", strokeWidth: 6 },
+                         projection: new OpenLayers.Projection("EPSG:4326"),
+                         strategies: [new OpenLayers.Strategy.Fixed()],
+                         protocol: new OpenLayers.Protocol.HTTP({
+                                         url: "/phil/gpx/dolfield-rd-original.gpx",
+                                         format: new OpenLayers.Format.GPX()})}));
+    dolfield_rd_map.addLayer(
+      new OpenLayers.Layer.Vector("Dolfield Rd (remaining)",
+                       { style: { strokeColor: "lightblue", strokeWidth: 3 },
+                         projection: new OpenLayers.Projection("EPSG:4326"),
+                         strategies: [new OpenLayers.Strategy.Fixed()],
+                         protocol: new OpenLayers.Protocol.HTTP({
+                                         url: "/phil/gpx/dolfield-rd-remaining.gpx",
+                                         format: new OpenLayers.Format.GPX()})}));
+    dolfield_rd_map.addLayer(
+      new OpenLayers.Layer.Vector("Red Run Stream Valley Trail",
+                       { style: { strokeColor: "lawngreen", strokeWidth: 3 },
+                         projection: new OpenLayers.Projection("EPSG:4326"),
+                         strategies: [new OpenLayers.Strategy.Fixed()],
+                         protocol: new OpenLayers.Protocol.HTTP({
+                                         url: "/phil/gpx/red-run-stream-valley-trail.gpx",
+                                         format: new OpenLayers.Format.GPX()})}));
+
+    if (!dolfield_rd_map.getCenter()) {
+      var dolfield_rd_lonLat = new OpenLayers.LonLat(dolfield_rd_lon, dolfield_rd_lat).transform(new OpenLayers.Projection("EPSG:4326"), dolfield_rd_map.getProjectionObject());
+      dolfield_rd_map.setCenter(dolfield_rd_lonLat, dolfield_rd_zoom);
+    }
+  }
+</script>
+
+<div id="dolfield_rd_map" style="height: 512px"></div>
+
+<script>init_dolfield_rd();</script>
+
+<p>The thick, dark blue line is where Dolfield Road once ran.  At one point,
+it connected Painters Mill Road and Deer Park Road.</p>
+
+<p>The thinner, light blue line shows where Dolfield Road, in all its
+parts, runs today.  When Interstate 795 was built, Dolfield Road was cut
+in two, as happened to many roads during the construation of the
+Interstate system.  At the same time, part of the eastern portion of
+Dolfield Road was diverted to make room for the ramps from Owings Mills
+Boulevard to Interstate 795.  The section of Dolfield Road south of Owings
+Mills Boulevard was renamed South Dolfield Road, for reasons I cannot
+find.</p>
+
+<p>At some point--I cannot tell when, exactly--the chunk of Dolfield Road
+that extends from present-day Red Run Boulevard to Pleasant Hill Road was
+closed, though I was unable to find out why.  The small section between
+Red Run Boulevard and Interstate 795 now serves as an access road to a SHA
+facility, and the rest of the closed section has been turned into a
+hiking/biking trail (colored in light green on the map).  Finally, the
+section of Dolfield Road just west of Pleasant Hill Road was realigned
+when Dolfield Boulevard was built.</p>
+
+<p>Here's a map of Dolfield Boulevard:</p>
+
+<script type="text/javascript">
+  // Start position for the map
+  var dolfield_blvd_lat=39.4246189;
+  var dolfield_blvd_lon=-76.80318905;
+  var dolfield_blvd_zoom=13;
+
+  var dolfield_blvd_map;  
+  function init_dolfield_blvd() {
+    dolfield_blvd_map = new OpenLayers.Map ("dolfield_blvd_map", {
+        controls:[
+            new OpenLayers.Control.Navigation(),
+            new OpenLayers.Control.PanZoom(),
+            new OpenLayers.Control.Attribution(),
+            new OpenLayers.Control.LayerSwitcher()],
+        maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+        maxResolution: 156543.0399,
+        numZoomLevels: 19,
+        units: 'm',
+        projection: new OpenLayers.Projection("EPSG:900913"),
+        displayProjection: new OpenLayers.Projection("EPSG:4326")
+    } );
+
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM("MapQuest", ["http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile2.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile3.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png", "http://otile4.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png"], {numZoomLevels: 19}));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM.Osmarender("Osmarender"));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.OSM.CycleMap("CycleMap"));
+
+    dolfield_blvd_map.addLayer(
+      new OpenLayers.Layer.GML("Dolfield Blvd (proposed)", "/phil/gpx/dolfield-blvd-proposed.gpx",
+                       { format: OpenLayers.Format.GPX,
+                         style: {strokeColor: "purple", strokeWidth: 6},
+                         projection: new OpenLayers.Projection("EPSG:4326")}));
+    dolfield_blvd_map.addLayer(
+      new OpenLayers.Layer.GML("Dolfield Blvd (fully divided)", "/phil/gpx/dolfield-blvd-dualized.gpx",
+                       { format: OpenLayers.Format.GPX,
+                         style: {strokeColor: "plum", strokeWidth: 3},
+                         projection: new OpenLayers.Projection("EPSG:4326")}));
+    dolfield_blvd_map.addLayer(new OpenLayers.Layer.GML("Dolfield Blvd (undivided)", "/phil/gpx/dolfield-blvd-single.gpx",
+                       { format: OpenLayers.Format.GPX,
+                         style: {strokeColor: "pink", strokeWidth: 3},
+                         projection: new OpenLayers.Projection("EPSG:4326")}));
+
+    if (!dolfield_blvd_map.getCenter()) {
+      var dolfield_blvd_lonLat = new OpenLayers.LonLat(dolfield_blvd_lon, dolfield_blvd_lat).transform(new OpenLayers.Projection("EPSG:4326"), dolfield_blvd_map.getProjectionObject());
+      dolfield_blvd_map.setCenter(dolfield_blvd_lonLat, dolfield_blvd_zoom);
+    }
+  }
+</script>
+
+<div id="dolfield_blvd_map" style="height: 512px"></div>
+
+<script>init_dolfield_blvd();</script>
+
+<p>At some point in the past, the county planned to build a road named
+Dolfield Boulevard that would connect Owings Mills New Town with the
+eastern area of Reisterstown, both areas that were slated for new
+development.  The road was planned to have two lanes in each direction
+with a raised median dividing the road.  The dark purple line on the above
+map shows where it was to have gone, as far as I can tell.  I'm not sure
+whether the original plans included anything further north, though it
+might have made sense to connect it to Owings Mills Boulevard.</p>
+
+<p>Unfortunately for the county, a number of people living in the proposed
+path of the new road put up sufficient objections that the project
+stalled.  Portions along Reisterstown Road and Academy Avenue were built
+and, in both cases, partly divided and partly not--the light purple
+lines are the divided sections and the pink lines are the undivided
+sections.  Furthermore, the southern end of Dolfield Boulevard was built
+without incident as part of the development of Owings Mills New Town,
+though part of Pleasant Hill Road was rechristened Dolfield Boulevard but
+left undivided.</p>
+
+<p>From what I can tell, the county never entirely abandoned its plans for
+Dolfield Boulevard, but they seems to be shelved indefinitely.  Separately
+from those plans, they are currently considering adding an interchange
+between Dolfield Boulevard and Interstate 795 (which would have been
+really convenient for me if it had been in place when I lived there).</p>
+
+<p>So there are three sections of Dolfield Road (and a South Dolfield Road)
+because Interstate 795 and other factors caused a former road to be split
+into pieces, and there are three sections of Dolfield Boulevard because
+that's as far as the county has gotten on the plans for a new road.  This
+ends today's episode of "I'm a geek and will research anything that
+catches my fancy".</p>
+
+
+<h2>Wed, 21 Sep 2011</h2>
+
+<div class="story-title" id="knife-meme">
+  <h3>Knife Meme</h3>
+  <div class="title-links">
+    11:55AM |
+    <a href="Geekery(1)" >Geekery</a> |
+    
+    <a href="Geekery/knife-meme.html" title="permalink for Knife Meme" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>This is <a href="https://vees.net/blog/68">a thing</a>, apparently: "Take knife from pocket, post
+pic on the internet."</p>
+
+<p><a style="float: right; clear: both" href="http://www.flickr.com/photos/phil_g/6169449074/" title="Myerchin Lightknife by phil_g, on Flickr"><img src="https://farm7.static.flickr.com/6172/6169449074_f1b6778427_m.jpg" width="240" height="180" alt="Myerchin Lightknife"></a>
+My main knife, and the one that best matches the intent of the
+meme, I think, is a <a href="http://www.myerchin.com/">Myerchin</a> Lightknife L377P, which they
+apparently don't sell anymore.  It's a very nice, light, compact knife,
+with a multipurpose half-straight half-serrated blade; a marlinspike,
+which is useful for knot- and ropework; and a small red LED, which is nice
+for seeing things without ruining your night vision.  I use the
+marlinspike a lot less these days, because I don't do as much decorative
+knotwork, but it's still occasionally useful.</p>
+
+<p>The knife was a Christmas gift from my dad and stepmother a number of
+years ago.  (Possibly 2004 or so.)  I'd been thinking about replacing my
+at-the-time pocket knife, something from Spyderco, with a lighter, more
+compact knife, when I read
+<a href="http://www.kk.org/cooltools/archives/000209.php">a Cool Tools review of the Myerchin L377P</a>.  It sounded
+like it would do everything I wanted and more, so I made a Christmas
+request and then got what I asked for.</p>
+
+<p><a style="float: right; clear: both" href="http://www.flickr.com/photos/phil_g/6169455480/" title="Brookstone Credit Card Multi-tool by phil_g, on Flickr"><img src="https://farm7.static.flickr.com/6151/6169455480_345419841f_m.jpg" width="240" height="180" alt="Brookstone Credit Card Multi-tool"></a>
+The Myerchin isn't the only knife that meets the letter of the meme's
+wording, though.  I also have a credit-card-shaped multitool from
+Brookstone in my wallet.  I use it mostly for its tweezers, but its pen,
+needle, scissors, and knife blade are also occasionally useful.</p>
+
+<p><a style="float: right; clear: both" href="http://www.flickr.com/photos/phil_g/6168929255/" title="Victorinox CyberTool by phil_g, on Flickr"><img src="https://farm7.static.flickr.com/6167/6168929255_7890927dc5_m.jpg" width="240" height="180" alt="Victorinox CyberTool"></a>
+A knife I also usually have on me is my
+<a href="http://www.swissarmy.com/MultiTools/Pages/Product.aspx?category=doityourself&amp;product=53919&amp;">Victorinox Swiss Army CyberTool</a>.  Technically, it lives in my
+laptop bag, not my pocket, but I usually have the bag with me.  It's very
+useful for dealing with all sorts of small-scale hardware, because it's
+got the screwdriver with interchangeable phillips, flat, and torx bits,
+plus the small pliers (which also include a wire cutter).</p>
+
+<p>This was a birthday gift from my parents back in 2000 or so.  It replaced
+my previous everyday knife, a
+<a href="http://www.sakwiki.com/tiki-index.php?page=Automobile+Special">Swiss Army Automobile Special</a>, which had also been a
+birthday gift from my parents.  Victorinox had just come out with the
+CyberTool and I'd been working for a couple of years in a hardware and
+software tech support position, so I let my parents know I was really
+interested in the new knife.  More than ten years later, it's still
+serving me well.</p>
+
+<p><a style="float: right; clear: both" href="http://www.flickr.com/photos/phil_g/6169486394/" title="CRKT Rollock by phil_g, on Flickr"><img src="https://farm7.static.flickr.com/6156/6169486394_cedd113afd_m.jpg" width="240" height="180" alt="CRKT Rollock"></a>
+The last knife that I usually have on me (also in my laptop bag) is a
+<a href="http://www.crkt.com/">Columbia River Knife &amp; Tool</a> Rollock, which doesn't appear to be
+for sale anymore.  It's got an interesting opening mechanism; instead of
+unfolding, the blade flips up a little and slides out of the body, locking
+into place at its fullest extent.  It's mostly in my laptop bag because
+it's very slim, so it doesn't take up much extra room and it's handy if
+I've forgotten my Myerchin somewhere.  Because it's got a completely
+straight blade, it's less of a pain to sharpen than the Myerchin, so it's
+usually the sharpest knife I have on me, which sometimes means I use it
+instead of the Myerchin even if I have both with me.</p>
+
+<p>This one was a gift from my youngest sister at her wedding as thanks for
+being a groomsman and playing trumpet in the wedding.</p>
+
+
+<h2>Mon, 02 May 2011</h2>
+
+<div class="story-title" id="MTA-and-GTFS">
+  <h3>The MTA and GTFS</h3>
+  <div class="title-links">
+    8:50PM |
+    <a href="Geekery(1)" >Geekery</a> |
+    
+    <a href="Geekery/MTA-and-GTFS.html" title="permalink for The MTA and GTFS" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>Just today I found about <a href="https://code.google.com/transit/spec/transit_feed_specification.html#routes_txt___Field_Definitions">GTFS</a>, a standardized data format from Google
+for describing public transit schedules.  I subsequently discovered that
+<a href="http://mta.maryland.gov/about/publicgtfsdata.cfm">the MTA has a GTFS feed</a>.</p>
+
+<p>Back when I didn't have a car, I used the MTA daily and had a set of
+scripts to extract their schedule data from the website and import it into
+<a href="http://trainsched.sourceforge.net/">trainsched</a> on my Palm Pilot.  I asked them for more structured data at
+one point but was rebuffed, so I stuck with my scripts that had to be
+updated every time they changed their schedule pages.</p>
+
+<p>I don't have a Palm Pilot any more (and trainsched doesn't even run on the
+PalmOS emulator on my WebOS phone), but I thought it would be nice to
+update my old scripts to use the new GTFS feeds.  This should even work
+with other GTFS feeds; there's nothing really MTA-specific going on.</p>
+
+<p>The updated scripts are here: <a href="../MTA/index.html">GTFS to trainsched converter</a>.</p>
+
+
+<h2>Fri, 02 Jan 2009</h2>
+
+<div class="story-title" id="backup-implementation">
+  <h3>Backup Implementation</h3>
+  <div class="title-links">
+    1:03PM |
+    <a href="Geekery(1)" >Geekery</a> |
+    
+    <a href="Geekery/backup-implementation.html" title="permalink for Backup Implementation" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I <a href="Geekery/backup-ideas.html">previously</a> considered different backup schemes.  Writing
+that entry crystallized my basic ideas about what I was going to do about
+the backups.  I then proceeded to implement them.  This entry is a
+detailed description of what I did.</p>
+
+<h3>Backup Overview</h3>
+
+<p>I ended up buying two <a href="http://www.newegg.com/Product/Product.aspx?Item=N82E16822135106" title="Western Digital Caviar Blue WD800JD 80GB 7200 RPM 8MB Cache SATA 3.0Gb/s Hard Drive - OEM">80 GB hard drives</a> and a <a href="http://www.newegg.com/Product/Product.aspx?Item=N82E16817153066" title="Thermaltake BlacX N0028USU External Hard Drive SATA Enclosure Docking Station 2.5&quot; &amp; 3.5&quot; USB 2.0 - Retail ">ThermalTake BlacX
+external enclosure</a>.  The overall plan is to do backups to one of
+the drives on a daily, automated basis, and the other on a periodic, maybe
+monthly basis.  Most of the time, the periodic backup drive will live at
+my office and will serve as my offsite backup.</p>
+
+<p>I want to have a backup history in the same way that a tape rotation
+scheme would give me.  That way, if I don't notice there's something wrong
+with a file for a time, there's still a good chance I can retrieve it.  I
+also want things stored space-efficiently, so backing up unchanged files
+doesn't take up additional space.  This is accomplished pretty easily with
+<code>rsync</code>; I do one full backup, and then subsequent backups use <code>rsync</code>'s
+<code>--link-dest</code> option pointing to the most recent complete backup; any
+files that haven't changed are simply hardlinked together, so the two
+directory entries point to the same physical location on the disk.</p>
+
+<p>For the backup history, I decided to go with a variant of the <a href="http://www.alvechurchdata.co.uk/softhanoi.htm">Towers of
+Hanoi backup rotation</a>.  Instead of using a preset number of pegs,
+as I would have to do if I were using physical tapes, I can just calculate
+the numbers on the fly, effectively behaving as if I had an infinite
+number of tapes.  This rotation gives me roughly exponential backoff for
+my history; I can look at backups from yesterday, two days ago, four days
+ago, eight days ago, and so on.</p>
+
+<p>Finally, I decided to encrypt the drives.  This lets me cart them around
+with confidence that if they get lost or stolen, anyone who ends up with
+them won't have my personal files.  I used <a href="http://code.google.com/p/cryptsetup">LUKS</a> to encrypt the disks,
+and used both a file on my computer and a password as keys.  The file
+makes it easier to mount the drives without manual intervention (important
+if my desktop reboots), while the password lets me get at the data if the
+key file isn't available (important if the main disk dies and I need my
+backups).</p>
+
+<h3>Backup Procedure</h3>
+
+<h4>Set up fstab.</h4>
+
+<p>The first thing I did was to set up /etc/fstab for the disks.  Since I
+only have one enclosure, I have to swap disks, so only one will ever be
+connected at the same time.  Thus, I mount whichever's in at the moment on
+/backups.  Likewise, I will associate each one with the dm-crypt name of
+"backups", so the device will be /dev/mapper/backups.  Thus, I added the
+following line to /etc/fstab:</p>
+
+<pre><code>/dev/mapper/backups  /backups  auto  defaults  0  0
+</code></pre>
+
+<h4>Set up <code>rsync</code> filters.</h4>
+
+<p>I'm using <code>rsync</code> to do the backups, but in some cases I don't want
+everything in the source directories to be backed up.  Thus, I tell
+<code>rsync</code> to look at a filter file for each directory so it knows what to
+skip and what to keep.  <code>rsync</code> will go through the filters for each file
+or directory it considers, and will take the first action that matches.
+If nothing matched, the file is copied.  If a directory is ignored, none
+of the files in that directory are considered at all, so I had to include
+a few explicit directory chains.</p>
+
+<p>In /var, I only want to back up a few things, so the final pattern ignores
+anything that isn't explicitly included.</p>
+
+<pre><code>+ /backups
++ /backups/**
++ /lib
++ /lib/bzr
++ /lib/bzr/**
++ /lib/svn
++ /lib/svn/**
+- *
+</code></pre>
+
+<p>For my home directory, I include everything, with a few exceptions.  For
+instance, most of my music directory can be reripped from CD if needed, so
+I don't need to take up space backing up those files.  On the other hand,
+I have some files that I either purchased online or downloaded and
+wouldn't be able to easily replace if they were lost, so I do back them
+up.  Here's an excerpt from my home filter file:</p>
+
+<pre><code>+ /movies/Star_Wars_Holiday_Special
++ /movies/Star_Wars_Holiday_Special/**
+- /movies
+
++ /music
++ /music/Bonerama
++ /music/Bonerama/Bringing_It_Home
++ /music/Bonerama/Bringing_It_Home/**
++ /music/Jonathan_Coulton
++ /music/Jonathan_Coulton/Thing_a_Week_Three
++ /music/Jonathan_Coulton/Thing_a_Week_Three/03-Code_Monkey*
++ /music/Nine_Inch_Nails
++ /music/Nine_Inch_Nails/Ghosts_I-IV
++ /music/Nine_Inch_Nails/Ghosts_I-IV/**
++ /music/Nine_Inch_Nails/The_Slip
++ /music/Nine_Inch_Nails/The_Slip/**
++ /music/Obelix
++ /music/Obelix/**
++ /music/Solo_String_Project
++ /music/Solo_String_Project/**
+- /music/**
+
+- /tmp
+</code></pre>
+
+<h4>Initialize disks.</h4>
+
+<p>I wrote a script to initialize the disks for me: <a href="../backups/init-backup-disk">init-backup-disk</a>.  It
+takes two parameters: the name of the device for the backup disk, and the
+file to use as a key for the partition.  If the key file doesn't exist, it
+will be created.</p>
+
+<p>After a few sanity checks, the script starts doing things.  It starts by
+checking that the disk is good with <code>badblocks</code>.  If it encounters any
+errors, it stops there and the drive needs to be sent in for warranty
+replacement.  Following that, it goes into the most time-consuming part of
+the initialization: writing random data to the disk.  (<code>badblocks</code> already
+wrote random data, but its PRNG is somewhat simplistic; /dev/urandom is a
+much better source of pseudo-random numbers.)  Without this step, it would
+be obvious which bits of the disk had encrypted data on them.  I use
+<a href="http://www.ivarch.com/programs/pv.shtml"><code>pv</code></a> to give a progress meter and time estimate.  On my computer,
+<code>badblocks</code> took a little over two hours and /dev/urandom took about eight
+hours for each 80GB disk.</p>
+
+<pre><code># Check and randomize disk.
+badblocks -b 512 -s -w -t random -v &#036;disk || exit 2
+&lt;/dev/urandom pv -s &#036;(fdisk -l &#036;disk |
+    perl -nle 'm{^Disk '&#036;{disk}': [0-9.]+ [KMGT]B, (\d+) bytes&#036;} and print &#036;1') |
+  dd bs=512 conv=sync,noerror of=&#036;disk
+</code></pre>
+
+<p>The next step is to format the encrypted partition.  I use <code>sfdisk</code> to
+create a single partition that spans the entire drive, followed by
+<code>cryptsetup</code> to do the format.  I explicitly specify the cipher in order
+to use <a href="http://en.wikipedia.org/wiki/ESSIV#ESSIV">ESSIV</a>, which makes certain attacks more difficult.  The
+<code>--batch-mode</code> option keeps it from asking for confirmation before
+writing.  The second call to <code>sfdisk</code> just tells the kernel to reread the
+disk's partitions so it will pick up the UUID that <code>cryptsetup</code> created.</p>
+
+<pre><code># Add and format the LUKS partition.
+echo , | sfdisk --Linux &#036;disk
+cryptsetup luksFormat --cipher aes-cbc-essiv:sha256 --batch-mode &#036;{disk}1 &#036;keyfile
+sfdisk -R &#036;disk; sleep 5
+</code></pre>
+
+<p>Next, I open, format, and mount the partition.  JFS is the filesystem
+that's been nicest to me, of all the journaling filesystems I've tried.
+(In the future, it might be nice to use ZFS for the backup disks--I'd get
+better detection of disk errors, at least--but I don't think it would play
+entirely well with running over an encrypted volume, and they haven't
+integrated encryption into ZFS yet, as far as I can tell.)</p>
+
+<pre><code># Open LUKS partition, format and mount the encrypted volume.
+cryptsetup --key-file &#036;keyfile luksOpen &#036;{disk}1 backups
+mkfs -t jfs -q /dev/mapper/backups
+mount /backups
+</code></pre>
+
+<p>Now I run the initial backup.  Each backup version is just a separate
+numbered directory in the partition, so the first one is '1'.  I'm backing
+up /etc, some of /var, my and my wife's home directories, and any
+databases I have.  My wife's stuff isn't directly backed up here because
+she's on a different computer; I have to initiate her backup from there.
+The script, in its first requirement for user interaction, will wait until
+I tell it that's done.</p>
+
+<pre><code># Do the initial backup.
+mkdir -vp /backups/1/{etc,var,phil,postgresql,mysql,rivana}
+chmod a-r /backups/1
+chown rivana /backups/1/rivana
+chown postgres /backups/1/postgresql
+rsync -avP --filter 'merge /etc/backups/etc-filter' /etc/ /backups/1/etc/
+rsync -avP --filter 'merge /etc/backups/var-filter' /var/ /backups/1/var/
+rsync -avP --filter 'merge /etc/backups/phil-filter' /home/phil/ /backups/1/phil/
+su -c 'pg_dumpall -v &gt;/backups/1/postgresql/dump' postgres
+mysqldump -v --all-databases &gt;/backups/1/mysql/dump
+echo -n "Hit enter when rivana is backed up.  "
+read foo
+</code></pre>
+
+<p>Now that the backup is done, the script unmounts and deactivates the partition.</p>
+
+<pre><code># Deactivate the encrypted volume.
+umount /backups
+cryptsetup luksClose backups
+</code></pre>
+
+<p>And I get prompted for the password that will unlock the partition if the
+key file isn't available.</p>
+
+<pre><code># Add user password.
+cryptsetup --key-file &#036;keyfile --verify-passphrase luksAddKey &#036;{disk}1
+</code></pre>
+
+<p>Finally, the script displays the UUID for the partition, which is needed
+for later use.</p>
+
+<pre><code># Display the partition's UUID.
+echo -n 'UUID: '
+cryptsetup luksUUID &#036;{disk}1
+</code></pre>
+
+<h4>Set up crypttab.</h4>
+
+<p>Debian, at least, has an /etc/crypttab file that lists encrypted
+partitions to be enabled at boot time.  I put the onsite backup disk in
+there so it'll be automatically mounted if the computer reboots.  This
+plus a backup cronjob make the backup process completely automated.</p>
+
+<pre><code>backups  /dev/disk/by-uuid/&lt;onsite UUID&gt;  &lt;key file&gt;  luks
+</code></pre>
+
+<h4>Do local backups.</h4>
+
+<p>I have a simple script to do the daily backups: <a href="../backups/perform-backup">perform-backup</a>.  It's
+basically the same as the initial backup, but with the <code>--link-dest</code>
+option as I mentioned previously.</p>
+
+<pre><code>last_num=&#036;(ls -t /backups | head -1)
+((num=&#036;last_num+1))
+
+mkdir -p /backups/&#036;num/{etc,var,phil,postgresql,mysql,rivana}
+chown rivana /backups/&#036;num/rivana
+chmod a-r /backups/&#036;num
+rsync -a --filter 'merge /etc/backups/etc-filter' --link-dest=/backups/&#036;last_num/etc /etc/ /backups/&#036;num/etc/
+rsync -a --filter 'merge /etc/backups/var-filter' --link-dest=/backups/&#036;last_num/var /var/ /backups/&#036;num/var/
+rsync -a --filter 'merge /etc/backups/phil-filter' --link-dest=/backups/&#036;last_num/phil /home/phil/ /backups/&#036;num/phil/
+chown postgres /backups/&#036;num/postgresql
+su -c "pg_dumpall &gt;/backups/&#036;num/postgresql/dump" postgres
+mysqldump --all-databases &gt;/backups/&#036;num/mysql/dump
+</code></pre>
+
+<h4>Do Becca's backup</h4>
+
+<p>My wife has her own computer but, fortunately, simpler backup
+requirements.  I have ssh public key authentication set up so she can ssh
+to my computer without a password, which makes the backups work properly
+in an automated fashion.</p>
+
+<p>The initial backup is a simple <code>rsync</code> one-liner.</p>
+
+<pre><code>rsync -avP ~/ mithrandir:/backups/1/rivana/
+</code></pre>
+
+<p>Subsequent backups are a simple script:</p>
+
+<pre><code>#!/bin/sh
+
+num=&#036;(ssh mithrandir ls -t /backups | head -1)
+last_num=&#036;(ssh mithrandir ls -t /backups | head -2 | tail -1)
+
+rsync -a --link-dest=/backups/&#036;{last_num}/rivana &#036;{HOME}/ mithrandir:/backups/&#036;{num}/rivana/
+</code></pre>
+
+<h4>Backup rotation.</h4>
+
+<p>The Towers of Hanoi rotation is effected by a script that goes through and
+deletes any directories that don't need to be there: <a href="../backups/purge-backups">purge-backups</a>.  I
+won't quote it here because I don't think it's all that interesting.  It
+just finds the largest power of two less than or equal to the current
+number and then works its way down from that to enumerate all of the
+directories, deleting everything else.</p>
+
+<h4>Offsite backups.</h4>
+
+<p>Every so often I'll bring the offsite disk home and back up to it.  The
+script for that is <a href="../backups/insert-offsite-backup">insert-offsite-backup</a>.  It unmounts the onsite
+disk, waits for me to insert the offsite disk, runs a backup, unmounts the
+offsite disk, waits for me to reinsert the onsite disk, then remounts that
+disk.  It needs to be told what my offsite UUID is, but it picks up all
+the other settings from /etc/crypttab.</p>
+
+<p>The backup takes about half an hour, so I have ample time to manually run
+the backup script on Becca's computer.</p>
+
+
+<h2>Mon, 22 Dec 2008</h2>
+
+<div class="story-title" id="backup-ideas">
+  <h3>Backups</h3>
+  <div class="title-links">
+    11:06AM |
+    <a href="Geekery(1)" >Geekery</a> |
+    
+    <a href="Geekery/backup-ideas.html" title="permalink for Backups" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I had a dream last night that the apartment beneath ours caught on fire,
+we had to rush out of the building, and my computer and all of its data
+was destroyed.</p>
+
+<p>I've been pondering a formal backup system for a while now.  (My current
+system involves making sure important files are in a version control
+system and exist on at least my laptop and desktop.  This is pretty
+ad-hoc, inconsistently updated, and not entirely comprehensive.)  I'm
+taking my dream as impetus to actually set something up.  This post is to
+help me organize my thoughts and see if anyone has any comments or
+suggestions.</p>
+
+<h4>My Requirements</h4>
+
+<p>I want to have a full rotating versioned backup system, where I have
+complete daily backups for a recent time span (say a week or so) and more
+sporadic backups back to as much as a year in the past.  Ideally, the
+backups should be stored in a space-efficient manner so unchanged files
+don't take up more space than a single copy would require.  The backups
+should have off-site redundancy.  They should be relatively easy to use;
+they should be fully automated on a day-to-day basis, with notification
+when things go wrong.  Ease of setup would be nice but not necessary.</p>
+
+<h4>My Data</h4>
+
+<p>I currently have about 720 GB of data in my home directory, plus a few
+hundred MB elsewhere on the computer that I'd want to back up.  I also
+have about 11GB in a bzr repository, but all of that should remain
+duplicated in my home directory.  Most of the data in my home directory is
+in media files that I can either replace (rerip CDs, etc.) or live
+without; only 25 GB of it is stuff that I <em>must</em> back up.  (A further 130
+GB is stuff that would be nice to back up, but I can just burn it to DVD
+and consider those my backups; the data is essentially static.)</p>
+
+<h4>JWZ Backups</h4>
+
+<p>The easiest approach is the <a href="http://jwz.livejournal.com/801607.html">JWZ backup solution</a>.  For all of
+my data, that would be two <a href="http://www.newegg.com/Product/Product.aspx?Item#N82E16822136321" title="Western Digital WDE1UBK10000N 1TB Black External Hard Drive - Retail">1 TB external hard drives</a>, for
+about $220.  If I restrict myself to the "must backup" data, I could make
+do with two <a href="http://www.newegg.com/Product/Product.aspx?Item#N82E16822242001" title="cirago CST1060 60GB 5400 RPM External Hard Drive - Retail">60 GB external hard drives</a> for about $80.  In
+either case, I'd keep one drive at the office and swap them periodically.</p>
+
+<p>The advantage of this approach is that I control everything.  I can put
+encrypted volumes on the drives, so if they get lost or stolen, my data
+isn't usable to other people.  I can use rsync with hardlinks between
+datestamped directories to get versioned backups with efficient disk
+usage.  The drawbacks are a modest initial monetary outlay and the need to
+coordinate shuttling drives back and forth.</p>
+
+<h4>Amazon S3</h4>
+
+<p>Another approach is to use <a href="http://aws.amazon.com/s3/">Amazon S3</a> to store my data.  It's offsite
+by definition (and stored among multiple data centers; if I write data to
+it, I can reasonably trust that I'll get that data back).  It's not too
+expensive: at $0.17/GB-month, my minimal backup will cost about
+$3.85/month.  Throw in transfer costs and churn, and I doubt I'd exceed
+$6/month.  (The initial upload would be $2.56.  A full restore would cost
+me $4.36.)  With S3, I would only back up the minimal data; the 130 GB of
+optional backups would cost an additional $20/month, which would exceed
+the cost of the full do-it-myself hard drive backups in one year.</p>
+
+<p>The complication to S3 is that it's just a web-based data storage service;
+you need additional software to make a reasonable backup solution.</p>
+
+<h5>Jungle Disk</h5>
+
+<p>From everything I've read, <a href="http://jungledisk.com/">Jungle Disk</a> is currently the best software
+for storing filesystem data on S3.  It runs on Windows, Mac OSX, and
+Linux, and exports your S3 buckets as a WebDAV disk, which you can then
+mount and treat like an ordinary (unlimited capacity) disk drive.  All
+data is encrypted before it's sent to S3.</p>
+
+<p>I like this approach.  Since it looks like a disk, I can use the same
+rsync setup I would with my own disks, and since the data is encrypted, I
+don't need to worry too much about it being transported over the Internet
+and stored on someone else's servers.  The main drawback is that it's
+proprietary software.  In addition to my principled preference of open
+source software to proprietary, there's also the issue that, especially
+because the data's encrypted, this software would be my only access to my
+backups.  If something went wrong and I couldn't get support from the
+company (e.g. they went out of business), I'd be out of luck.</p>
+
+<p>The software costs $20.  Assuming $5/month on S3, it would take one year
+for this approach to cost more than the minimal get-my-own-disks approach.</p>
+
+<h5>Other S3 software</h5>
+
+<p>I haven't seen anything else that will let me back up to S3 and keep
+versioned backups in a space-efficient manner.  Most of the S3 backup
+software I've seen doesn't do versions, and the few that do don't appear
+to do it space-efficiently.  As always, I have the option of writing my
+own, but that would take a fair amount of time and effort, and I'd be
+likely to give up partway through, continuing to leave myself without
+good backups.</p>
+
+<h4>Conclusion</h4>
+
+<p>Barring any better suggestions from others, I'm leaning towards the two
+smallish hard drives.  They'd pay for themselves after a year of use, and
+I get complete control of my data (for better or worse).  I like the idea
+of using S3, but it's more expensive in the long run, and I'm not
+completely happy with any of the software I've found to use with it.</p>
+
+
+<h2>Wed, 19 Nov 2008</h2>
+
+<div class="story-title" id="more-delphi-type-hate">
+  <h3>More Delphi Type Hate</h3>
+  <div class="title-links">
+    11:36AM |
+    <a href="Geekery(1)" >Geekery</a> |
+    
+    <a href="Geekery/more-delphi-type-hate.html" title="permalink for More Delphi Type Hate" rel="bookmark">#</a>
+  </div>
+</div>
+
+<p>I have simple needs.  I have a base class with some generic behavior and
+subclasses with specific information for that generic behavior.
+More concretely, the subclasses need to provide the generic behavior with
+an ordered list of things that designate key fields on database tables.
+The best representation of those "things" in Delphi seems to be members of
+an enumeration:</p>
+
+<pre><code>type
+  TKeyField = (kfFoo, kfBar, kfBaz, kfQuux);
+</code></pre>
+
+<p>Since I need the list of fields to be ordered, I need them in an array:</p>
+
+<pre><code>type
+  TKeyFieldArray = array of TKeyField;
+</code></pre>
+
+<p>The declaration of the base class is pretty simple:</p>
+
+<pre><code>type
+  TBaseClass = class
+   protected
+    function GetKeyFieldList : TKeyFieldArray; virtual; abstract;
+   public
+    procedure DoSomethingWithKeyFields;
+  end;
+</code></pre>
+
+<p>As is the declaration of the subclass:</p>
+
+<pre><code>type
+  TSubClass = class(TBaseClass)
+   protected
+    function GetKeyFieldList : TKeyFieldArray; override;
+  end;
+</code></pre>
+
+<p>So where's the problem?  Where's the hate?  The hate is in the
+implementation.  If Delphi had array literals, this would be easy.
+Something like:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+begin
+  Result := [kfBar, kfFoo, kfQuux];
+end;
+</code></pre>
+
+<p>But it doesn't.  It has some special magic for array literals if they're
+the parameter to a function, but not anywhere else.  It does, however,
+have a syntax for array <em>constants</em>.  Perhaps this will work:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+  const
+    keyFieldList : TKeyFieldArray = (kfBar, kfFoo, kfQuux);
+begin
+  Result := keyFieldList;
+end;
+</code></pre>
+
+<p>But no.  That <code>TKeyFieldArray</code> is a <em>dynamic array</em>; Delphi doesn't
+allocate any space for it, so it can't be a constant value.  You have to
+tell Delphi how big each constant array is, even though you're <em>already
+telling it</em> how many elements are in the array.  So perhaps this is the
+solution:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+  const
+    keyFieldList : array[0..2] of TKeyField = (kfBar, kfFoo, kfQuux);
+begin
+  Result := keyFieldList;
+end;
+</code></pre>
+
+<p>But <strong>no</strong>.  Because of Delphi's approach to static typing, those are
+actually <em>different types</em>, and are therefore not assignment-compatible.
+(See <a href="http://philg.hates-software.com/2005/08/12/42d0f129.html" title="Delphi's Type-Bondage">previous</a> <a href="http://philg.hates-software.com/2006/08/25/aa53b474.html" title="Delphi.  Excessive type-bondage.">hates</a> on this subject.)  No, here is the
+code that Delphi makes me type for what should be a one-line function
+implementation:</p>
+
+<pre><code>function TSubClass.GetKeyFieldList : TKeyFieldArray;
+begin
+  SetLength(Result, 3);
+  Result[0] := kfBar;
+  Result[1] := kfFoo;
+  Result[2] := kfQuux;
+end;
+</code></pre>
+
+<p>And just earlier this morning I was pleased because I read that Delphi
+2007 (to which I'll soon be upgrading from Delphi 5) has <code>for...in</code> loops,
+so I can finally have <code>foreach</code>.  (Can't get the generics and anonymous
+functions in Delphi 2009, because we need .NET and that's not yet
+available for Delphi 2009.)  Oh, Delphi.  The one hand giveth, and the
+entire rest of the stupid, anemic, pox-ridden language taketh away.</p>
+
+
+</div>
+
+<div id="sidebar">
+  <h2>Static</h2>
+  <ul>
+    <li><a href="../prompt/index.html">zsh prompt</a></li>
+    <li><a href="../pgp/index.html">PGP</a></li>
+    <li><a href="../ssh/index.html">SSH</a></li>
+    <li><a href="../MTA/index.html">MTA</a></li>
+    <li><a href="../tutorials/index.html">tutorials</a></li>
+    <li><a href="../configs/index.html">config files</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/sets/1671829/">desktop</a></li>
+    <li><a href="http://www.librarything.com/catalog/asciiphil">books I own</a></li>
+    <li><a href="../stuff/index.html">stuff I'm giving away</a></li>
+    <li><a href="../drwho/index.html">Dr. Who eps I have</a></li>
+    <li><a href="http://del.icio.us/phil_g">bookmarks</a></li>
+    <li><a href="http://www.flickr.com/photos/phil_g/">photos</a></li>
+    <li><a href="../about.html">about</a></li>
+  </ul>
+
+  <h2>Directory</h2>
+  <ul class="categories">
+<li><a href="index.html">Root</a> (134)
+<ul>
+<li><a href="Books/index.html">Books</a> (31)
+</li>
+<li><a href="Events/index.html">Events</a> (7)
+<ul>
+<li><a href="Events/Burning_Man/index.html">Burning Man</a> (3)
+</li>
+<li><a href="Events/Camping/index.html">Camping</a> (2)
+</li>
+<li><a href="Events/PDF/index.html">PDF</a> (2)
+</li>
+</ul>
+</li>
+<li class="this-category">Geekery (30)
+<ul>
+<li><a href="Geekery/Test/index.html">Test</a> (3)
+</li>
+</ul>
+</li>
+<li><a href="General/index.html">General</a> (22)
+</li>
+<li><a href="Links/index.html">Links</a> (12)
+<ul>
+<li><a href="Links/Slashdot/index.html">Slashdot</a> (1)
+</li>
+</ul>
+</li>
+<li><a href="MTA/index.html">MTA</a> (22)
+</li>
+<li><a href="Recipes/index.html">Recipes</a> (4)
+</li>
+<li><a href="Video_Games/index.html">Video Games</a> (6)
+<ul>
+<li><a href="Video_Games/FFXI/index.html">FFXI</a> (1)
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+  <h2>Archive</h2>
+  <table class="month-calendar"><caption class="month-calendar-head"><a title="November 2012 (1)" href="2012/11/index.html">&larr;</a><a title="December 2012 ()" href="2012/12/index.html">December</a>&rarr;</caption>
+    <tr>
+      <th class="month-calendar-day-head Sunday">Sun</th>
+      <th class="month-calendar-day-head Monday">Mon</th>
+      <th class="month-calendar-day-head Tuesday">Tue</th>
+      <th class="month-calendar-day-head Wednesday">Wed</th>
+      <th class="month-calendar-day-head Thursday">Thu</th>
+      <th class="month-calendar-day-head Friday">Fri</th>
+      <th class="month-calendar-day-head Saturday">Sat</th>
+    </tr>
+    <tr>
+      <td class="month-calendar-day-noday Sunday">&nbsp;</td>
+      <td class="month-calendar-day-noday Monday">&nbsp;</td>
+      <td class="month-calendar-day-noday Tuesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Wednesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Thursday">&nbsp;</td>
+      <td class="month-calendar-day-noday Friday">&nbsp;</td>
+<td class="month-calendar-day-nolink Saturday">1</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">2</td>
+<td class="month-calendar-day-nolink Monday">3</td>
+<td class="month-calendar-day-nolink Tuesday">4</td>
+<td class="month-calendar-day-nolink Wednesday">5</td>
+<td class="month-calendar-day-nolink Thursday">6</td>
+<td class="month-calendar-day-nolink Friday">7</td>
+<td class="month-calendar-day-nolink Saturday">8</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">9</td>
+<td class="month-calendar-day-nolink Monday">10</td>
+<td class="month-calendar-day-nolink Tuesday">11</td>
+<td class="month-calendar-day-nolink Wednesday">12</td>
+<td class="month-calendar-day-nolink Thursday">13</td>
+<td class="month-calendar-day-nolink Friday">14</td>
+<td class="month-calendar-day-nolink Saturday">15</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">16</td>
+<td class="month-calendar-day-nolink Monday">17</td>
+<td class="month-calendar-day-nolink Tuesday">18</td>
+<td class="month-calendar-day-nolink Wednesday">19</td>
+<td class="month-calendar-day-nolink Thursday">20</td>
+<td class="month-calendar-day-nolink Friday">21</td>
+<td class="month-calendar-day-nolink Saturday">22</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-nolink Sunday">23</td>
+<td class="month-calendar-day-nolink Monday">24</td>
+<td class="month-calendar-day-nolink Tuesday">25</td>
+<td class="month-calendar-day-nolink Wednesday">26</td>
+<td class="month-calendar-day-this-day Thursday">27</td>
+<td class="month-calendar-day-future Friday">28</td>
+<td class="month-calendar-day-future Saturday">29</td>
+</tr>
+    <tr>
+<td class="month-calendar-day-future Sunday">30</td>
+<td class="month-calendar-day-future Monday">31</td>
+      <td class="month-calendar-day-noday Tuesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Wednesday">&nbsp;</td>
+      <td class="month-calendar-day-noday Thursday">&nbsp;</td>
+      <td class="month-calendar-day-noday Friday">&nbsp;</td>
+      <td class="month-calendar-day-noday Saturday">&nbsp;</td>
+</tr>
+</table>
+
+  <table class="year-calendar"><caption class="year-calendar-head"><a title="2011 (3)" href="2011/index.html">&larr;</a><a title="2012 (1)" href="2012/index.html">2012</a>&rarr;</caption><tr><th class="year-calendar-subhead" colspan="6">Months</th></tr>
+<tr>
+<td class="year-calendar-month-nolink">Jan</td>
+<td class="year-calendar-month-nolink">Feb</td>
+<td class="year-calendar-month-nolink">Mar</td>
+<td class="year-calendar-month-nolink">Apr</td>
+<td class="year-calendar-month-nolink">May</td>
+<td class="year-calendar-month-nolink">Jun</td>
+</tr>
+<tr>
+<td class="year-calendar-month-nolink">Jul</td>
+<td class="year-calendar-month-nolink">Aug</td>
+<td class="year-calendar-month-nolink">Sep</td>
+<td class="year-calendar-month-nolink">Oct</td>
+<td class="year-calendar-month-link"><a title="November 2012 (1)" href="2012/11/index.html">Nov</a></td>
+<td class="year-calendar-this-month">Dec</td></tr>
+</table>
+
+
+  <h2>Search</h2>
+  <form method="GET" action="http://www.google.com/custom">
+    <p style="text-align: center">
+      <input type="hidden" name="domains" value="aperiodic.net">
+      <input type="hidden" name="cof" VALUE="GALT:#66CC6;S:http://aperiodic.net/phil/;GL:2;VLC:#CC66CC;AH:center;BGC:#000000;LC:#6666CC;GFNT:#666666;ALC:#CC6666;T:#CCCCCC;GIMP:#FFFFFF;AWFID:d3f1afbc39619250;">
+      <input type="hidden" name="sitesearch" value="aperiodic.net">
+      <input name="q" type="text" size="25" maxlength="255" style="width: 10em"><br>
+      Powered by <a href="http://www.google.com/"><span class="google-G1">G</span><span class="google-o1">o</span><span class="google-o2">o</span><span class="google-g2">g</span><span class="google-l">l</span><span class="google-e">e</span></a>
+    </p>
+  </form>
+
+
+  <h2>Currently Reading</h2>
+
+  <div id="wb55a1f3ca64835526140c06560a0205e"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wb55a1f3ca64835526140c06560a0205e">
+  </script>
+
+  <h2>Recent Books</h2>
+
+  <div id="wa13cfbb5a4be4d629ebe322b83f1e2f6"></div>
+  <script type="text/javascript" charset="UTF-8"
+          src="http://www.librarything.com/widget_get.php?userid=asciiphil&theID=wa13cfbb5a4be4d629ebe322b83f1e2f6">
+  </script>
+
+</div>
+
+<div class="hr"><hr></div>
+<address><a href="mailto:phil_g@pobox.com">Phil! Gold</a></address>
+<p class="footer">
+<a href="../index.html">Back to main page.</a><br>
+</p>
+<ul class="validation">
+  <li>
+  <a href="http://validator.w3.org/check/referer">
+  <img src="http://aperiodic.net/phil/pics/html401.png" alt="Valid HTML 4.01">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://jigsaw.w3.org/css-validator/check/referer">
+  <img src="http://aperiodic.net/phil/pics/validcss.png" alt="Valid CSS 2">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://aperiodic.net/phil/archives/index.rss">
+  <img src="../pics/rss10(1).png" alt="RSS syndication">
+  </a>
+  </li>
+
+  <li>
+  <a href="http://feedvalidator.org/check?url=http://aperiodic.net/phil/archives/index.rss">
+  <img src="http://aperiodic.net/phil/pics/validrss.png" alt="Valid RSS 1.0">
+  </a>
+  </li>
+
+</ul>
+
+</html>
