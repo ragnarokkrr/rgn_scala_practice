@@ -1,4 +1,4 @@
-package ch06
+package org.rgn.scala.steps.ch06
 
 import scala.swing._
 

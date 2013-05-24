@@ -8,5 +8,6 @@
   <modules>
     <module>rgn_scala_byex</module>
     <module>rgn_scala_getst</module>
+    <module>rgn_scala_steps</module>
   </modules>
 </project>

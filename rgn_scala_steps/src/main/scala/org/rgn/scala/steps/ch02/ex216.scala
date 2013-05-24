@@ -1,4 +1,4 @@
-package ch02
+package org.rgn.scala.steps.ch02
 
 object ex216 {
 

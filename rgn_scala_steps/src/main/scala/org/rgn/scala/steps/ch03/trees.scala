@@ -1,4 +1,4 @@
-package ch03
+package org.rgn.scala.steps.ch03
 
 abstract class BinTree
 case object EmptyTree extends BinTree

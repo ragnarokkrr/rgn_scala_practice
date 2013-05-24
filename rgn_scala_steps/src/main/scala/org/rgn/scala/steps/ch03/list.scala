@@ -1,4 +1,4 @@
-package ch03
+package org.rgn.scala.steps.ch03
 
 abstract class LinkedList
 case object EmptyList extends LinkedList
