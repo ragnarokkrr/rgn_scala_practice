@@ -1,3 +1,5 @@
+package org.rgn.scala.byex
+
 object FirstExample {
 
   def main(args: Array[String]): Unit = {
