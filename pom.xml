@@ -7,5 +7,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>rgn_scala_byex</module>
+    <module>rgn_scala_getst</module>
   </modules>
 </project>
