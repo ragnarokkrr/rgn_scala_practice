@@ -23,7 +23,7 @@ object P04 extends ShouldMatchers {
 
   /**
    * http://blog.richdougherty.com/2009/04/tail-calls-tailrec-and-trampolines.html
-   * 
+   *
    * @param list
    * @return
    */
@@ -50,6 +50,5 @@ object P04 extends ShouldMatchers {
 
     resTR should be(6)
     println(resTR)
-
   }
 }
