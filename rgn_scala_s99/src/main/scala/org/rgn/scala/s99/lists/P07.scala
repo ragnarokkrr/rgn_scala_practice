@@ -23,8 +23,11 @@ object P07 extends ShouldMatchers {
     def _flat(result: List[Any], current: List[Any]): List[Any] = current match {
       case Nil => result
       case h :: tail if (h.isInstanceOf[List[Any]]) =>
+        printf("%20s %30s %30s\n", h, result, tail);
         _flat(result ::: flatten(h.asInstanceOf[List[Any]]), tail)
-      case h :: tail => _flat(result ::: List(h), tail)
+      case h :: tail => 
+        printf("%20s %30s %30s\n", h, result, tail);
+        _flat(result ::: List(h), tail)
     }
     _flat(Nil, ls)
   }
