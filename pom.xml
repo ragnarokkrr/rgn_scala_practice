@@ -10,5 +10,6 @@
     <module>rgn_scala_getst</module>
     <module>rgn_scala_steps</module>
     <module>rgn_scala_s99</module>
+    <module>rgn_scala_progin</module>
   </modules>
 </project>
