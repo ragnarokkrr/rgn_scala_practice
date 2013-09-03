@@ -11,5 +11,6 @@
     <module>rgn_scala_steps</module>
     <module>rgn_scala_s99</module>
     <module>rgn_scala_progin</module>
+    <module>rgn_scala_art</module>
   </modules>
 </project>

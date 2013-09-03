@@ -71,7 +71,6 @@ object e94 {
   }
   
   object FilterList{
-    //def posElems(l: LI)
     
   }
 
