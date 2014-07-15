@@ -1,6 +1,6 @@
 package org.rgn.scala.s99.lists
 
-import org.scalatest.matchers.ShouldMatchers
+//import org.scalatest.matchers.ShouldMatchers
 
 /**
  * S-99: Ninety-Nine Scala Problems
@@ -15,7 +15,7 @@ import org.scalatest.matchers.ShouldMatchers
  *
  */
 class P01
-object P01 extends ShouldMatchers {
+object P01 /*extends ShouldMatchers */{
 
   def last(l: List[Int]): Int = l match {
     case h :: Nil => h
@@ -28,6 +28,6 @@ object P01 extends ShouldMatchers {
     val ls = List(1, 1, 2, 3, 5, 8)
     val lastVal = last(ls)
     println(lastVal)
-    lastVal should be(8)
+//    lastVal should be(8)
   }
 }

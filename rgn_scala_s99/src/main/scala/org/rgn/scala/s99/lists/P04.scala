@@ -1,6 +1,6 @@
 package org.rgn.scala.s99.lists
 
-import org.scalatest.matchers.ShouldMatchers
+//import org.scalatest.matchers.ShouldMatchers
 import scala.annotation.tailrec
 
 /**
@@ -15,7 +15,7 @@ import scala.annotation.tailrec
  *
  */
 class P04
-object P04 extends ShouldMatchers {
+object P04 /*extends ShouldMatchers*/ {
   def length(ls: List[Int]): Int = ls match {
     case _ :: tail => 1 + length(tail)
     case Nil => 0
@@ -42,13 +42,13 @@ object P04 extends ShouldMatchers {
 
     val res = length(l)
 
-    res should be(6)
+//    res should be(6)
 
     println(res)
 
     val resTR = lengthTailRec(l)
 
-    resTR should be(6)
+//    resTR should be(6)
     println(resTR)
   }
 }

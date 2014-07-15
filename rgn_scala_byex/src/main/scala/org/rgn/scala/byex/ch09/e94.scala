@@ -40,16 +40,16 @@ object e94 {
 
     def test() {
       println("Scale - Nontail")
-      val l = List(10., 20, 30, 40)
-      val r = scaleList(l, 10.)
+      val l = List(10.0, 20, 30, 40)
+      val r = scaleList(l, 10.0)
       println(r)
 
       println("Scale - Tail")
-      val r1 = scaleListTail(l, 20.)
+      val r1 = scaleListTail(l, 20.0)
       println(r1)
 
       println("Scale - Map")
-      val r2 = scaleListTail(l, 20.)
+      val r2 = scaleListTail(l, 20.0)
       println(r2)
 
       println("List matrix map")

@@ -1,6 +1,6 @@
 package org.rgn.scala.s99.lists
 
-import org.scalatest.matchers.ShouldMatchers
+//import org.scalatest.matchers.ShouldMatchers
 
 /**
  * S-99: Ninety-Nine Scala Problems
@@ -15,7 +15,7 @@ import org.scalatest.matchers.ShouldMatchers
  *
  */
 class P03
-object P03 extends ShouldMatchers {
+object P03 /*extends ShouldMatchers */{
 
   def nth(n: Int, ls: List[Int]): Int = (n, ls) match {
     case (0, h :: _) => h
@@ -28,7 +28,7 @@ object P03 extends ShouldMatchers {
 	  val res = nth(2, ls)
 	  
 	  println (res)
-	  res should be(2)
+//	  res should be(2)
 	  
   }
 }

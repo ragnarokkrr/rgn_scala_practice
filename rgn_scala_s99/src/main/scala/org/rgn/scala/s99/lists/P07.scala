@@ -1,6 +1,6 @@
 package org.rgn.scala.s99.lists
 
-import org.scalatest.matchers.ShouldMatchers
+//import org.scalatest.matchers.ShouldMatchers
 import scala.annotation.tailrec
 
 /**
@@ -15,7 +15,7 @@ import scala.annotation.tailrec
  *
  */
 class P07
-object P07 extends ShouldMatchers {
+object P07 /*extends ShouldMatchers */{
 
   
   def flatten(ls: List[Any]): List[Any] = {
@@ -38,7 +38,7 @@ object P07 extends ShouldMatchers {
     val l = List(List(1, 1), 2, List(3, List(5, 8)))
     val r = flatten(l)
     print(r)
-    r should be(List(1,1,2,3,5,8))
+//    r should be(List(1,1,2,3,5,8))
   }
 
 }

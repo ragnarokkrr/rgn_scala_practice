@@ -1,6 +1,6 @@
 package org.rgn.scala.s99.lists
 
-import org.scalatest.matchers.ShouldMatchers
+//import org.scalatest.matchers.ShouldMatchers
 import scala.annotation.tailrec
 
 /**
@@ -15,7 +15,7 @@ import scala.annotation.tailrec
  *
  */
 class P05
-object P05 extends ShouldMatchers {
+object P05 /*extends ShouldMatchers */{
 
   def reverse(ls: List[Int]): List[Int] = ls match {
     case h :: tail => reverse(tail) ::: List(h)
@@ -39,15 +39,15 @@ object P05 extends ShouldMatchers {
     val l = List(1, 1, 2, 3, 5, 8)
     val r = reverse(l)
     val expected = List(8, 5, 3, 2, 1, 1)
-    //println(r)
+    println(r)
 
-    r should be(expected)
+//    r should be(expected)
 
 
 
     val r2 = reverseTail(l)
     println("r2: " + r2)
-    r2 should be(expected)
+//    r2 should be(expected)
   }
 
 }
